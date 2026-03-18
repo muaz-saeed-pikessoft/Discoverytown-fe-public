@@ -1,0 +1,18 @@
+#!/bin/sh
+. "$(dirname -- "$0")/_/husky.sh"
+message=$(cat "$1")
+requiredPattern="^NEXT-[0-9]+: .+$"
+if ! echo "$message" | grep -Eq "$requiredPattern"; then
+  echo "🚨🚨🚨🚨🚨"
+  echo "🚨🚨🚨🚨🚨"
+  echo "🚨🚨🚨🚨🚨"
+  echo "🚨 Wrong commit message! 😕"
+  echo "The commit message must have this format:"
+  echo "[NEXT -  JIRA ID]: any commit message"
+  echo "Your commit message was:"
+  echo "$message"
+  echo "🚨🚨🚨🚨🚨"
+  echo "🚨🚨🚨🚨🚨"
+  echo "🚨🚨🚨🚨🚨"
+  exit 1
+fi
