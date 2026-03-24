@@ -66,6 +66,7 @@ export interface SectionHeaderProps {
   desc?: string // for play/gym/events
   description?: string // for cafeFood compatibility
   accentColor?: string // e.g. 'var(--dt-coral)', overrides default teal
+  dark?: boolean
 }
 
 export interface NavItem {

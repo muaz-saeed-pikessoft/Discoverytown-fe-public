@@ -36,7 +36,7 @@
   --dt-purple:        #7a67d8;
 
   /* ── Dark / navy ─────────────────────────────────────── */
-  --dt-navy:          #14233b;
+  --dt-navy:          #0f1d35; /* rgb(15 29 53) */
   --dt-dark:          #101b2f;
   --dt-footer-bg:     #101726;
 
@@ -52,7 +52,7 @@
   --dt-border-light:  #ece7df;
 
   /* ── Text ─────────────────────────────────────────────── */
-  --dt-text-heading:  #14233b;
+  --dt-text-heading:  #0f1d35;
   --dt-text-body:     #445063;
   --dt-text-muted:    #667085;
   --dt-text-subtle:   #98a2b3;
@@ -89,7 +89,7 @@ body {
     radial-gradient(circle at top left, rgba(47, 111, 237, 0.06), transparent 26%),
     radial-gradient(circle at top right, rgba(234, 109, 87, 0.08), transparent 24%),
     linear-gradient(180deg, rgba(255, 255, 255, 0.68), rgba(255, 255, 255, 0));
-  color: var(--dt-text-heading);
+  color: var(--dt-text-body);
   font-family: var(--dt-font-body);
   font-size: var(--dt-fs-body);
   line-height: var(--dt-lh-body);
@@ -100,7 +100,6 @@ body {
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--dt-font-heading);
   line-height: var(--dt-lh-title);
-  color: var(--dt-text-heading);
 }
 
 ::selection {
