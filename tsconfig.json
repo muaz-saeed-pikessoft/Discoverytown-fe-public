@@ -14,7 +14,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "preserve",
+    "jsx": "react-jsx",
     "incremental": true,
     "paths": {
       "@/*": [
@@ -25,14 +25,19 @@
       {
         "name": "next"
       }
-    ]
+    ],
+    "target": "ES2017"
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
-, "src/components/events/EventTypesPage.tsx", "src/components/events/PrivateRoomPage.tsx", "src/components/events/TakeoutPartyPage.tsx"  ],
+    ".next/types/**/*.ts",
+    "src/components/events/EventTypesPage.tsx",
+    "src/components/events/PrivateRoomPage.tsx",
+    "src/components/events/TakeoutPartyPage.tsx",
+    ".next/dev/types/**/*.ts"
+  ],
   "exclude": [
     "node_modules"
   ]

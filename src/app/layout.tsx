@@ -1,17 +1,16 @@
 import type { Metadata } from 'next'
-import 'react-toastify/dist/ReactToastify.css'
-
-import '@/styles/globals.css'
+import type { ReactNode } from 'react'
 import Providers from './providers'
+import '@/styles/globals.css'
 
 export const metadata: Metadata = {
-  title: 'DiscoveryTown — Where Kids Discover Their World',
-  description: 'Drop-in play, classes, special events, birthday parties and more for families in the community.',
+  title: 'Discovery Town | Family Edutainment',
+  description: 'A place where play meets learning for the whole family.',
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang='en' data-theme='discovery'>
+    <html lang='en'>
       <body>
         <Providers>{children}</Providers>
       </body>

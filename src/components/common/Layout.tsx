@@ -5,7 +5,7 @@ import React, { memo, useEffect } from 'react'
 // import { useDispatch, useSelector } from 'react-redux'
 // import { useQuery } from '@tanstack/react-query'
 // import { meAuth } from '@/api/users'
-// import { logout } from '@/store/reducers/authSlice'
+// import { logout } from '@/store/slices/authSlice'
 
 const Layout = ({ children }: { children: React.ReactNode }) => {
   // const router = useRouter()

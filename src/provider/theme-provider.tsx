@@ -1,3 +1,5 @@
+'use client'
+
 import { createContext, useEffect, useState } from 'react'
 import { setTheme as setThemeInCSS } from '@/utils/theme-setting'
 

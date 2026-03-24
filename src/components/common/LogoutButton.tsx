@@ -4,7 +4,7 @@ import React from 'react'
 import { useRouter } from 'next/navigation'
 import { useDispatch } from 'react-redux'
 
-import { logout } from '@/store/reducers/authSlice'
+import { logout } from '@/store/slices/authSlice'
 import { deleteCookie } from '@/utils/cookie-setting'
 
 const LogoutBtn = () => {

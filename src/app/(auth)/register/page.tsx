@@ -9,7 +9,7 @@ import * as yup from 'yup'
 import { useDispatch } from 'react-redux'
 import { toast } from 'react-toastify'
 
-import { login } from '@/store/reducers/authSlice'
+import { login } from '@/store/slices/authSlice'
 import type { RegisterFormValues } from '@/types/form-types'
 
 const schema = yup.object({

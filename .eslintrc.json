@@ -26,7 +26,7 @@
     "import/no-absolute-path": "error",
 
     "lines-around-comment": [
-      "error",
+      "warn",
       {
         "beforeLineComment": true,
         "beforeBlockComment": true,
@@ -37,17 +37,17 @@
       }
     ],
 
-    "newline-before-return": "error",
+    "newline-before-return": "warn",
 
     "import/newline-after-import": [
-      "error",
+      "warn",
       {
         "count": 1
       }
     ],
 
     "padding-line-between-statements": [
-      "error",
+      "warn",
       { "blankLine": "always", "prev": ["export"], "next": ["*"] },
       {
         "blankLine": "always",

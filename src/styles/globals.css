@@ -5,9 +5,9 @@
 /* ── Google Fonts ───────────────────────────────────────── */
 @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=DM+Serif+Display:ital@0;1&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@plugin "daisyui";
+@import "react-toastify/dist/ReactToastify.css";
 
 
 /* ========================================================
@@ -228,7 +228,6 @@ h1, h2, h3, h4, h5, h6 {
   animation: fadeUp 0.28s ease forwards;
 }
 
-@layer components {
   .dt-btn-primary {
     display: inline-flex;
     align-items: center;
@@ -474,4 +473,3 @@ h1, h2, h3, h4, h5, h6 {
     background: var(--dt-bg-soft);
     color: var(--dt-text-muted);
   }
-}
