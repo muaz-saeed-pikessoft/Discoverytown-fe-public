@@ -15,6 +15,13 @@ This Next.js project serves as an extensive boilerplate, providing a seamless st
 - **Husky** Husky integration for Git hooks
 - **DaisyUI** A component library
 
+## Prisma (frontend repo note)
+
+This frontend repo **does not include Prisma**. The `prisma/` folder was removed during the dual-portal migration so the frontend can be split cleanly later.
+
+- **Type source of truth**: maintain API and domain types manually in `src/types/`
+- **Backend schema**: lives in the backend repo (and is not copied into this frontend)
+
 # Features
 
 ## 1. Authentication

@@ -1,6 +1,9 @@
 /**
  * Application route constants.
  * Single source of truth for all route paths to prevent magic strings.
+ *
+ * Migration note: new/extended route constants are moving to `src/constants/routes.ts`.
+ * Keep this file for backward compatibility during transition.
  */
 
 export const ROUTES = {

@@ -27,9 +27,9 @@ import type { RawOrderConfirmationResponse } from '@/data/adapters/commerceAdapt
 import type { StorefrontCommerceItem } from '@/api/commerceApi'
 
 import { slugify } from '@/utils/slugify'
-import { GIFT_COLLECTIONS, ALACARTE_GROUPS } from '@/components/user/gifts/constants'
-import { RENTAL_SECTIONS } from '@/components/user/rentals/constants'
-import { FILTER_TAGS, SHOP_SECTIONS } from '@/components/user/shop/constants'
+import { GIFT_COLLECTIONS, ALACARTE_GROUPS } from '@/portal/user/components/gifts/constants'
+import { RENTAL_SECTIONS } from '@/portal/user/components/rentals/constants'
+import { FILTER_TAGS, SHOP_SECTIONS } from '@/portal/user/components/shop/constants'
 import {
   HOT_DRINKS,
   COLD_DRINKS,
@@ -43,8 +43,8 @@ import {
   KIDS_CORNER,
   SALADS,
   SNACKS,
-} from '@/components/user/cafeFood/constants'
-import { normalizeRows } from '@/components/user/cafeFood/pageHelpers'
+} from '@/portal/user/components/cafeFood/constants'
+import { normalizeRows } from '@/portal/user/components/cafeFood/pageHelpers'
 
 /* ── Auth ── */
 

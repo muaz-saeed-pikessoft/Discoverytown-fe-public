@@ -11,6 +11,7 @@ import { toast } from 'react-toastify'
 
 import { login } from '@/store/slices/authSlice'
 import { loginUser } from '@/api/authApi'
+import { signIn } from 'next-auth/react'
 import type { LoginFormValues } from '@/types/form-types'
 
 const schema = yup.object({
@@ -21,6 +22,7 @@ const schema = yup.object({
 export default function LoginPage() {
   const router = useRouter()
   const dispatch = useDispatch()
+  const [mode, setMode] = React.useState<'user' | 'staff'>('user')
 
   const {
     register,
@@ -32,19 +34,36 @@ export default function LoginPage() {
 
   const onSubmit = async (data: LoginFormValues) => {
     try {
-      const response = await loginUser({
-        email: data.email,
-        password: data.password,
-      })
-      
-      dispatch(login({ 
-        user: response.user,
-        token: response.accessToken,
-        refreshToken: response.refreshToken
-      }))
-      
-      toast.success('Welcome back!')
-      router.push('/my-account')
+      if (mode === 'staff') {
+        const result = await signIn('credentials', {
+          redirect: false,
+          email: data.email,
+          password: data.password,
+        })
+
+        if (result?.error) {
+          throw new Error(result.error)
+        }
+
+        toast.success('Welcome back!')
+        router.push('/admin/dashboard')
+      } else {
+        const response = await loginUser({
+          email: data.email,
+          password: data.password,
+        })
+
+        dispatch(
+          login({
+            user: response.user,
+            token: response.accessToken,
+            refreshToken: response.refreshToken,
+          })
+        )
+
+        toast.success('Welcome back!')
+        router.push('/my-account')
+      }
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Login failed. Please check your credentials.')
     }
@@ -73,10 +92,35 @@ export default function LoginPage() {
 
         <div className='mb-7 text-center'>
           <h1 className='mb-1.5 font-serif text-[1.8rem] font-black text-[var(--dt-navy)]'>Welcome back!</h1>
-          <p className='text-sm font-semibold text-[#888]'>Sign in to manage your bookings</p>
+          <p className='text-sm font-semibold text-[#888]'>
+            {mode === 'staff' ? 'Staff sign in to manage the platform' : 'Sign in to manage your bookings'}
+          </p>
         </div>
 
         <div className='rounded-3xl border border-[#F0EDE8] bg-white px-8 py-9 shadow-[0_8px_40px_rgba(0,0,0,0.08)]'>
+          <div className='mb-6 grid grid-cols-2 gap-2 rounded-2xl border border-gray-100 bg-gray-50 p-2'>
+            <button
+              type='button'
+              onClick={() => setMode('user')}
+              className={[
+                'h-10 rounded-xl text-xs font-black transition',
+                mode === 'user' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800',
+              ].join(' ')}
+            >
+              Customer
+            </button>
+            <button
+              type='button'
+              onClick={() => setMode('staff')}
+              className={[
+                'h-10 rounded-xl text-xs font-black transition',
+                mode === 'staff' ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-800',
+              ].join(' ')}
+            >
+              Staff
+            </button>
+          </div>
+
           <form onSubmit={handleSubmit(onSubmit)} noValidate>
             <div className='mb-5'>
               <label className='mb-1.5 block text-[13px] font-bold text-[var(--dt-navy)]' htmlFor='email'>
@@ -99,9 +143,12 @@ export default function LoginPage() {
                 <label className='block text-[13px] font-bold text-[var(--dt-navy)]' htmlFor='password'>
                   Password
                 </label>
-                <a href='#' className='text-xs font-bold text-[var(--dt-coral)] no-underline hover:underline'>
+                <Link
+                  href='/forgot-password'
+                  className='text-xs font-bold text-[var(--dt-coral)] no-underline hover:underline'
+                >
                   Forgot password?
-                </a>
+                </Link>
               </div>
               <input
                 id='password'

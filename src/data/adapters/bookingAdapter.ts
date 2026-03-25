@@ -138,6 +138,8 @@ export interface RawPartyPackageResponse {
  * Transform a single raw booking response into BookingRecord.
  */
 export function adaptBooking(raw: RawBookingResponse): BookingRecord {
+  const rawGuests = Array.isArray(raw.guests) ? raw.guests : []
+
   return {
     id: raw.id,
     type: raw.booking_type as BookingType,
@@ -147,7 +149,7 @@ export function adaptBooking(raw: RawBookingResponse): BookingRecord {
     status: raw.status as BookingStatus,
     amount: raw.total_amount,
     confirmationCode: raw.confirmation_code,
-    guests: raw.guests.map((guest) => ({
+    guests: rawGuests.map(guest => ({
       id: guest.id,
       name: guest.full_name,
       age: guest.age,

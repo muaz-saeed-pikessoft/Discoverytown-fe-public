@@ -1,0 +1,55 @@
+import type { AdminEventRow } from './types'
+
+export const MOCK_ADMIN_EVENTS: AdminEventRow[] = [
+  {
+    id: 'evt_1001',
+    name: 'Spring Family Play Session',
+    startAt: '2026-03-28 10:00',
+    endAt: '2026-03-28 12:00',
+    location: 'Main Floor',
+    capacity: 40,
+    booked: 22,
+    status: 'published',
+  },
+  {
+    id: 'evt_1002',
+    name: 'STEM Saturday Workshop',
+    startAt: '2026-03-29 09:30',
+    endAt: '2026-03-29 11:00',
+    location: 'STEM Lab',
+    capacity: 18,
+    booked: 18,
+    status: 'published',
+  },
+  {
+    id: 'evt_1003',
+    name: 'Private Party Block',
+    startAt: '2026-03-30 15:00',
+    endAt: '2026-03-30 17:30',
+    location: 'Party Room A',
+    capacity: 1,
+    booked: 1,
+    status: 'draft',
+  },
+  {
+    id: 'evt_1004',
+    name: 'Toddler Tunes',
+    startAt: '2026-04-01 10:00',
+    endAt: '2026-04-01 10:45',
+    location: 'Music Corner',
+    capacity: 12,
+    booked: 4,
+    status: 'published',
+  },
+  {
+    id: 'evt_1005',
+    name: 'Maintenance Hold',
+    startAt: '2026-04-02 08:00',
+    endAt: '2026-04-02 12:00',
+    location: 'Main Floor',
+    capacity: 0,
+    booked: 0,
+    status: 'cancelled',
+  },
+]
+

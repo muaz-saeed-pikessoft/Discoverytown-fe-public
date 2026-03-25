@@ -1,4 +1,4 @@
-import RentalsPageClient from '@/components/user/rentals/RentalsPageClient'
+import RentalsPageClient from '@/portal/user/components/rentals/RentalsPageClient'
 
 export default function RentalsPage() {
   return <RentalsPageClient />

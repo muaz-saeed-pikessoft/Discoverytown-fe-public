@@ -1,4 +1,4 @@
-import GiftsPageClient from '@/components/user/gifts/GiftsPageClient'
+import GiftsPageClient from '@/portal/user/components/gifts/GiftsPageClient'
 
 export default function GiftsPage() {
   return <GiftsPageClient />

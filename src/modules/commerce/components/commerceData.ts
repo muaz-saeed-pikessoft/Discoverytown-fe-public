@@ -1,6 +1,6 @@
-import { GIFT_COLLECTIONS } from '@/components/user/gifts/constants'
-import { RENTAL_SECTIONS } from '@/components/user/rentals/constants'
-import { SHOP_SECTIONS } from '@/components/user/shop/constants'
+import { GIFT_COLLECTIONS } from '@/portal/user/components/gifts/constants'
+import { RENTAL_SECTIONS } from '@/portal/user/components/rentals/constants'
+import { SHOP_SECTIONS } from '@/portal/user/components/shop/constants'
 import { slugify } from '@/utils/slugify'
 
 export type CommerceCategory = 'gift' | 'rental' | 'shop'

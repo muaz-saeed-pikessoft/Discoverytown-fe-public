@@ -8,7 +8,7 @@
 
 import React, { useMemo } from 'react'
 
-import DataTable from '@/components/ui/DataTable'
+import DataTable from '@/components/shared/DataTable'
 import { useTable } from '@/hooks/useTable'
 import type { TableColumn } from '@/types/common'
 

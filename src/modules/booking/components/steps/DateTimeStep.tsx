@@ -25,8 +25,10 @@ export default function DateTimeStep({
     enabled: !!booking.date,
   })
 
-  // Normalize static times with API times if available
-  const availableTimes = slots.length > 0 ? slots.map(s => s.startTime) : service.times
+  const availableTimes =
+    slots.length > 0
+      ? slots.map(slot => ({ key: slot.id, time: slot.startTime }))
+      : service.times.map((time, idx) => ({ key: `${time}-${idx}`, time }))
 
   return (
     <div className='step-panel dt-surface rounded-[28px] p-6 lg:p-8'>
@@ -80,12 +82,12 @@ export default function DateTimeStep({
                 <div className='h-12 animate-pulse rounded-[12px] bg-black/5' />
               </>
             ) : booking.date ? (
-              availableTimes.map(time => {
+              availableTimes.map(({ key, time }) => {
                 const selected = booking.time === time
 
                 return (
                   <button
-                    key={time}
+                    key={key}
                     type='button'
                     onClick={() => update({ time })}
                     className='cursor-pointer rounded-[12px] border-[1.5px] py-3 text-center text-[13px] font-bold transition-all duration-150'

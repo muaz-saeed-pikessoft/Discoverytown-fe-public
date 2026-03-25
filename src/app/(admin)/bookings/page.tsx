@@ -9,7 +9,7 @@
 import { useMemo } from 'react'
 
 import { useQuery } from '@tanstack/react-query'
-import DataTable from '@/components/ui/DataTable'
+import DataTable from '@/components/shared/DataTable'
 import { getBookings } from '@/api/bookingApi'
 import { useTable } from '@/hooks/useTable'
 import type { TableColumn } from '@/types/common'

@@ -4,6 +4,8 @@
  */
 
 import type { UserRole } from './common'
+import type { StaffRoleEnum } from './admin.types'
+import type { PermissionMap } from './permissions.types'
 
 /** Authenticated user profile stored in Redux */
 export interface AuthUser {
@@ -57,4 +59,40 @@ export interface RegisterResponse {
 export interface RefreshTokenResponse {
   accessToken: string
   refreshToken: string
+}
+
+/**
+ * Staff auth (next-auth) -- additive, coexists with legacy user auth.
+ */
+
+export interface StaffSessionUser {
+  staffUserId: string
+  organizationId: string
+  /**
+   * Legacy static role identifier (temporary).
+   * Dynamic RBAC should use roleId/roleName/permissions.
+   */
+  role: StaffRoleEnum
+  /** Dynamic role ID set by admin (RBAC) */
+  roleId?: string
+  /** Dynamic role display name */
+  roleName?: string
+  /** Dynamic permission map for this staff user */
+  permissions?: PermissionMap
+  firstName: string
+  lastName: string
+  email: string
+  onboardingStep?: number
+}
+
+export interface StaffLoginRequest {
+  email: string
+  password: string
+}
+
+export interface StaffLoginResponse {
+  accessToken: string
+  refreshToken: string
+  expiresIn: number
+  user: StaffSessionUser
 }

@@ -1,4 +1,4 @@
-import GymPageClient from '@/components/user/gym/Gympageclient'
+import GymPageClient from '@/portal/user/components/gym/Gympageclient'
 
 export default function GymPage() {
   return <GymPageClient />
