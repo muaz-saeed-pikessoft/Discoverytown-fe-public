@@ -1,4 +1,4 @@
-export type GiftSectionId = 'gourmet' | 'family' | 'wellness' | 'luxury' | 'alacarte' | 'delivery' | 'policy'
+export type GiftSectionId = 'gift-boxes' | 'a-la-carte' | 'gourmet' | 'family' | 'wellness' | 'luxury' | 'alacarte' | 'delivery' | 'policy'
 
 export interface NavSectionItem {
   id: GiftSectionId
@@ -78,6 +78,17 @@ export interface PolicyCard {
   rows: string[]
 }
 
+export interface GiftBox {
+  id: string
+  name: string
+  tagline: string
+  priceLabel: string
+  image: string
+  badges: string[]
+  url: string
+}
+
 export interface GiftCardProps {
-  gift: GiftItem
+  gift?: GiftItem
+  box?: GiftBox
 }

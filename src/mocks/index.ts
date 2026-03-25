@@ -15,7 +15,7 @@
  * Returns immediately in production or server-side contexts.
  */
 /** Prevents double-start from React 18 StrictMode or HMR re-runs */
-let mswStartPromise: Promise<void> | null = null
+let mswStartPromise: Promise<unknown> | null = null
 
 export async function initMocks(): Promise<void> {
   const isServer = typeof window === 'undefined'
@@ -27,7 +27,8 @@ export async function initMocks(): Promise<void> {
   }
 
   if (mswStartPromise) {
-    return mswStartPromise
+    await mswStartPromise
+    return
   }
 
   const { worker } = await import('./browser')
@@ -37,5 +38,5 @@ export async function initMocks(): Promise<void> {
     quiet: false,
   })
 
-  return mswStartPromise
+  await mswStartPromise
 }

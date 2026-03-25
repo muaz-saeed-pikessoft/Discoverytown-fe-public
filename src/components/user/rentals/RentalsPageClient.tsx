@@ -35,8 +35,7 @@ export default function RentalsPageClient() {
            id: p.id,
            name: p.name,
            desc: p.description,
-           detail: p.description,
-           priceLabel: `$${p.price.toFixed(2)}`,
+           price: `$${p.price.toFixed(2)}`,
            image: p.image,
            badge: p.tags[0] || 'Available'
         }))

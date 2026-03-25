@@ -1,13 +1,9 @@
 import type { AlacarteGroup, GiftCollectionSection, HeroPill, InfoCard, NavSectionItem, PolicyCard } from './types'
 
 export const NAV_SECTIONS: NavSectionItem[] = [
-  { id: 'gourmet', label: 'Gourmet' },
-  { id: 'family', label: 'Family Fun' },
-  { id: 'wellness', label: 'Wellness' },
-  { id: 'luxury', label: 'Luxury' },
-  { id: 'alacarte', label: 'À La Carte' },
+  { id: 'gift-boxes', label: 'Gift Boxes' },
+  { id: 'a-la-carte', label: 'À La Carte' },
   { id: 'delivery', label: 'Delivery Info' },
-  { id: 'policy', label: 'Policies' },
 ]
 
 export const GOURMET_GIFTS = [

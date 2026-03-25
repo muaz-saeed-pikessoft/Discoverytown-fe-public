@@ -38,9 +38,12 @@ export default function ShopPageClient() {
         .map(p => ({
           name: p.name,
           desc: p.description,
-          priceLabel: `$${p.price.toFixed(2)}`,
+          price: `$${p.price.toFixed(2)}`,
           image: p.image,
-          badge: p.tags.find(t => FILTER_TAGS.includes(t as any)) as FilterTag || undefined
+          badge: p.tags.find(t => FILTER_TAGS.includes(t as any)) as FilterTag || undefined,
+          color: 'var(--dt-shop-purple)',
+          bg: '#F3F0FF',
+          border: '#D0BFFF'
         }))
       
       return {
