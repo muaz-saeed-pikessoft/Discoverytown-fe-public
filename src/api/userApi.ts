@@ -1,15 +1,17 @@
 /**
  * User API service.
- * Handles profile, children, and account operations.
  *
- * Currently returns mock data.
- * When backend is ready: replace mock returns with apiClient calls.
+ * Handles profile and children operations via Axios.
+ * MSW intercepts these calls in development; real backend handles them in production.
+ *
+ * API-READY: Only endpoint URLs need to change for production.
  */
 
-import type { CustomerProfile, ChildProfile } from '@/types/booking-types'
-import { MOCK_PROFILE } from '@/data/mockData'
+import { adaptProfile } from '@/data/adapters/userAdapter'
+import type { RawProfileResponse } from '@/data/adapters/userAdapter'
+import type { ChildProfile, CustomerProfile } from '@/types/booking-types'
 
-// import apiClient from './client'
+import apiClient from './client'
 
 /** Profile update payload */
 export interface UpdateProfilePayload {
@@ -29,50 +31,71 @@ export interface AddChildPayload {
 
 /**
  * Fetch the current user's profile.
- *
- * API-READY: Replace mock with:
- *   const { data } = await apiClient.get<CustomerProfile>('/users/profile')
- *   return data
+ * API-READY: Only endpoint URL needs to change for production.
  */
 export async function getUserProfile(): Promise<CustomerProfile> {
-  return { ...MOCK_PROFILE }
+  const { data } = await apiClient.get<RawProfileResponse>(
+    '/api/users/profile',
+  )
+
+  return adaptProfile(data)
 }
 
 /**
  * Update the current user's profile.
- *
- * API-READY: Replace mock with:
- *   const { data } = await apiClient.put<CustomerProfile>('/users/profile', payload)
- *   return data
+ * API-READY: Only endpoint URL needs to change for production.
  */
-export async function updateUserProfile(payload: UpdateProfilePayload): Promise<CustomerProfile> {
-  return {
-    ...MOCK_PROFILE,
-    ...payload,
-  }
+export async function updateUserProfile(
+  payload: UpdateProfilePayload,
+): Promise<CustomerProfile> {
+  const { data } = await apiClient.put<RawProfileResponse>(
+    '/api/users/profile',
+    {
+      first_name: payload.firstName,
+      last_name: payload.lastName,
+      email: payload.email,
+      phone: payload.phone,
+    },
+  )
+
+  return adaptProfile(data)
 }
 
 /**
  * Fetch the current user's children.
- *
- * API-READY: Replace mock with:
- *   const { data } = await apiClient.get<ChildProfile[]>('/users/children')
- *   return data
+ * API-READY: Only endpoint URL needs to change for production.
  */
 export async function getUserChildren(): Promise<ChildProfile[]> {
-  return [...MOCK_PROFILE.children]
+  const profile = await getUserProfile()
+
+  return profile.children
 }
 
 /**
  * Add a new child to the profile.
- *
- * API-READY: Replace mock with:
- *   const { data } = await apiClient.post<ChildProfile>('/users/children', payload)
- *   return data
+ * API-READY: Only endpoint URL needs to change for production.
  */
-export async function addChild(payload: AddChildPayload): Promise<ChildProfile> {
+export async function addChild(
+  payload: AddChildPayload,
+): Promise<ChildProfile> {
+  const { data } = await apiClient.post<{
+    id: string
+    name: string
+    date_of_birth: string
+    allergies: string
+    notes: string
+  }>('/api/users/children', {
+    name: payload.name,
+    date_of_birth: payload.dob,
+    allergies: payload.allergies,
+    notes: payload.notes,
+  })
+
   return {
-    id: `child-${Date.now()}`,
-    ...payload,
+    id: data.id,
+    name: data.name,
+    dob: data.date_of_birth,
+    allergies: data.allergies,
+    notes: data.notes,
   }
 }

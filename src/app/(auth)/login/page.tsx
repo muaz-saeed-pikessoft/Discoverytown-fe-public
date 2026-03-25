@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux'
 import { toast } from 'react-toastify'
 
 import { login } from '@/store/slices/authSlice'
+import { loginUser } from '@/api/authApi'
 import type { LoginFormValues } from '@/types/form-types'
 
 const schema = yup.object({
@@ -30,10 +31,23 @@ export default function LoginPage() {
   })
 
   const onSubmit = async (data: LoginFormValues) => {
-    await new Promise<void>(resolve => setTimeout(resolve, 800))
-    dispatch(login({ email: data.email, name: 'Sarah Johnson' }))
-    toast.success('Welcome back!')
-    router.push('/my-account')
+    try {
+      const response = await loginUser({
+        email: data.email,
+        password: data.password,
+      })
+      
+      dispatch(login({ 
+        user: response.user,
+        token: response.accessToken,
+        refreshToken: response.refreshToken
+      }))
+      
+      toast.success('Welcome back!')
+      router.push('/my-account')
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Login failed. Please check your credentials.')
+    }
   }
 
   const inputClass =

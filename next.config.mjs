@@ -19,9 +19,10 @@ const nextConfig = {
     const cspHeader = `
       default-src 'self';
       script-src 'self' 'unsafe-eval' 'unsafe-inline';
-      style-src 'self' 'unsafe-inline';
-      img-src 'self' blob: data: images.unsplash.com;
-      font-src 'self';
+      style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+      img-src 'self' blob: data: https://images.unsplash.com;
+      font-src 'self' https://fonts.gstatic.com;
+      connect-src 'self' https://images.unsplash.com https://fonts.gstatic.com https://fonts.googleapis.com;
       object-src 'none';
       base-uri 'self';
       form-action 'self';

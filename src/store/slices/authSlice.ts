@@ -17,6 +17,7 @@ import type { UserRole } from '@/types/common'
 
 /** Authenticated user shape */
 interface AuthUser {
+  id: string
   email: string
   name: string
   role: UserRole
@@ -68,7 +69,7 @@ const authSlice = createSlice({
       } else {
         /** Backward compatibility with old payload shape */
         const { email, name } = action.payload
-        state.user = { email, name, role: 'user' }
+        state.user = { id: 'legacy-id', email, name, role: 'user' }
         state.isAuthenticated = true
         state.role = 'user'
       }

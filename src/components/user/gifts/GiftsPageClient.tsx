@@ -1,27 +1,46 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
-
-import { ALACARTE_GROUPS, GIFT_COLLECTIONS, NAV_SECTIONS } from './constants'
+import React, { useState, useMemo, useEffect } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { getCommerceItems } from '@/api/commerceApi'
+import { NAV_SECTIONS, HERO_PILLS } from './constants'
 import type { GiftSectionId } from './types'
 import Hero from '@/components/shared/Hero'
 import ActionLink from '@/components/shared/ActionLink'
 import FlowSteps from '@/components/shared/FlowSteps'
-import Section from '@/components/shared/Section'
 import SectionHeader from '@/components/shared/SectionHeader'
 import SectionNav from '@/components/shared/SectionNav'
 import CtaStrip from '@/components/shared/CtaStrip'
 import GiftCard from './GiftCard'
-import DeliveryInfoSection from './DeliveryInfoSection'
 import AlacarteSection from './AlacarteSection'
+import DeliveryInfoSection from './DeliveryInfoSection'
 
 export default function GiftsPageClient() {
-  const [activeSection, setActiveSection] = useState<GiftSectionId>('gourmet')
+  const [activeSection, setActiveSection] = useState<GiftSectionId>('gift-boxes')
+
+  const { data: allProducts = [], isLoading } = useQuery({
+    queryKey: ['commerce', 'gifts'],
+    queryFn: () => getCommerceItems('gifts'),
+  })
 
   function scrollToSection(id: GiftSectionId) {
     setActiveSection(id)
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
+
+  const giftBoxes = useMemo(() => {
+     const boxes = allProducts.filter(p => p.tags.includes('box'))
+     if (boxes.length === 0) return []
+     return boxes.map(p => ({
+        id: p.id,
+        name: p.name,
+        tagline: p.description,
+        priceLabel: `$${p.price.toFixed(2)}`,
+        image: p.image,
+        badges: p.tags.filter(t => t !== 'box' && t !== 'gifts'),
+        url: `/checkout?category=gift&item=${p.id}`
+     }))
+  }, [allProducts])
 
   useEffect(() => {
     const ids = NAV_SECTIONS.map(n => n.id)
@@ -37,94 +56,101 @@ export default function GiftsPageClient() {
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
-
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
   return (
-    <div className='min-h-screen bg-[var(--dt-bg-page)] dt-font-body'>
+    <div className='min-h-screen bg-[var(--dt-bg-page)] dt-font-body pb-20'>
       <Hero
-        eyebrow={<p className='dt-eyebrow text-[var(--dt-coral)] mb-2'>Gifts &amp; Care Packages</p>}
+        eyebrow={<p className='dt-eyebrow text-[var(--dt-primary)] mb-2'>Gifts &amp; Celebration</p>}
         title={
           <>
-            Gift an <em className='not-italic text-[var(--dt-coral)]'>Experience</em>
+            Joy, Delivered with <em className='not-italic text-[var(--dt-primary)]'>Heart</em>
           </>
         }
-        description='Curated gift baskets, care packages, and activity kits delivered locally. Perfect for new parents, recovering kids, or just because.'
-        bgUrl='https://images.unsplash.com/photo-1549465220-1a8b9238cd48?w=1400&q=80'
+        description='DiscoveryTown curated gift boxes, digital cards, and custom celebration bundles. Perfectly packaged and ready to make someone’s day.'
+        bgUrl='https://images.unsplash.com/photo-1549462818-499cf8bc034d?w=1400&q=80'
         actions={
-          <ActionLink href='/checkout?category=gift' accentColor='var(--dt-coral)' className='px-7 py-3.5 text-sm'>
-            Order a Gift
+          <ActionLink href='#gift-boxes' accentColor='var(--dt-primary)' className='px-7 py-3.5 text-sm'>
+            Browse Gift Boxes
           </ActionLink>
         }
       />
 
       <SectionNav items={NAV_SECTIONS} active={activeSection} onNav={scrollToSection} />
 
-      <div className='max-w-[1200px] mx-auto px-6 py-8 pb-20'>
-        <FlowSteps
-          eyebrow='How Gift Orders Work'
-          title='Choose, personalize, then schedule delivery'
-          description='Gift baskets now have a complete frontend order flow. Customers can pick a package, set delivery details, and submit the request without guessing what happens next.'
-          accentColor='var(--dt-coral)'
-          primaryHref='/checkout?category=gift'
-          primaryLabel='Start Gift Order'
-          secondaryHref='#gourmet'
-          secondaryLabel='Browse Collections'
-          steps={[
-            {
-              title: 'Choose a basket',
-              description: 'Start from any collection and open the order flow directly from the card.',
-            },
-            {
-              title: 'Set delivery details',
-              description: 'Pick pickup or delivery, choose a date, and add any note or customization request.',
-            },
-            {
-              title: 'Confirm the order',
-              description: 'Review the gift, add your contact details, and submit the frontend request.',
-            },
-          ]}
-        />
+      <div className='max-w-[1200px] mx-auto px-6 py-8 flex flex-col gap-6'>
+        {isLoading ? (
+          <div className='flex items-center justify-center py-20'>
+             <div className='h-8 w-8 animate-spin rounded-full border-4 border-[var(--dt-primary)] border-t-transparent' />
+          </div>
+        ) : (
+          <>
+            <FlowSteps
+              eyebrow='How Gifting Works'
+              title='Choose, customize, and send in minutes'
+              description='DiscoveryTown gifting now has a complete frontend purchase path for boxes and a la carte items.'
+              accentColor='var(--dt-primary)'
+              primaryHref='/checkout?category=gift'
+              primaryLabel='Start Gifting Flow'
+              secondaryHref='#gift-boxes'
+              secondaryLabel='Browse Boxes'
+              steps={[
+                {
+                  title: 'Pick your gift',
+                  description: 'Choose a curated box, a la carte items, or a flexible digital card.',
+                },
+                {
+                  title: 'Add a message',
+                  description: 'Personalize the gift with a recipient name and a custom note in the checkout flow.',
+                },
+                {
+                  title: 'Set fulfillment',
+                  description: 'Choose digital delivery, local pickup, or doorstep shipping for physical gifts.',
+                },
+              ]}
+            />
 
-        {GIFT_COLLECTIONS.map(collection => (
-          <React.Fragment key={collection.id}>
-            <Section id={collection.id}>
+            <section id='gift-boxes' className='mt-8 scroll-mt-36'>
               <SectionHeader
-                eyebrow={collection.eyebrow}
-                title={collection.title}
-                desc={collection.desc}
-                accentColor='var(--dt-coral)'
+                eyebrow='Curated Selections'
+                title='Discovery Gift Boxes'
+                description='Pre-packaged joy for every occasion. Each box is hand-assembled with our most popular shop and cafe treats.'
               />
-              <div className='grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3'>
-                {collection.gifts.map(gift => (
-                  <GiftCard key={gift.name} gift={gift} />
-                ))}
+              <div className='grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3'>
+                {giftBoxes.length > 0 ? giftBoxes.map(box => (
+                  <GiftCard key={box.id} box={box} />
+                )) : (
+                  <div className='col-span-full py-12 text-center text-gray-400'>
+                     No gift boxes found in the catalog.
+                  </div>
+                )}
               </div>
-            </Section>
+            </section>
+
             <div className='dt-section-divider' />
-          </React.Fragment>
-        ))}
 
-        {/* À La Carte */}
-        <Section id='alacarte'>
-          <AlacarteSection />
-        </Section>
+            <section id='a-la-carte' className='scroll-mt-32'>
+              <AlacarteSection />
+            </section>
 
-        <div className='dt-section-divider' />
+            <div className='dt-section-divider' />
 
-        {/* Delivery Info */}
-        <Section id='delivery'>
-          <DeliveryInfoSection />
-        </Section>
+            <section id='delivery' className='scroll-mt-32'>
+              <DeliveryInfoSection />
+            </section>
 
-        <CtaStrip
-          title='Bring a smile to someone today'
-          subtitle='Open the full gift checkout flow, choose a basket, and schedule the handoff.'
-          primaryHref='/checkout?category=gift'
-          primaryLabel='Order Now'
-          primaryColor='var(--dt-coral)'
-        />
+            <CtaStrip
+              title='Spread some joy today'
+              subtitle='Start the gifting flow to combine items and messages in one beautiful package.'
+              primaryHref='/checkout?category=gift'
+              primaryLabel='Send a Gift'
+              primaryColor='var(--dt-primary)'
+              secondaryHref='/contact'
+              secondaryLabel='Custom Requests'
+            />
+          </>
+        )}
       </div>
     </div>
   )

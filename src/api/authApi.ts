@@ -1,78 +1,88 @@
 /**
  * Authentication API service.
- * Handles login, register, refresh, and logout.
  *
- * Currently returns mock responses.
- * When backend is ready: replace mock returns with apiClient calls.
+ * Handles login, register, refresh, and logout via Axios.
+ * MSW intercepts these calls in development; real backend handles them in production.
+ *
+ * API-READY: Only endpoint URLs need to change for production.
  */
 
-import type { LoginRequest, LoginResponse, RegisterRequest, RegisterResponse, RefreshTokenResponse } from '@/types/auth'
+import {
+  adaptLoginResponse,
+  adaptRegisterResponse,
+  adaptRefreshResponse,
+} from '@/data/adapters/authAdapter'
+import type {
+  RawLoginResponse,
+  RawRegisterResponse,
+  RawRefreshTokenResponse,
+} from '@/data/adapters/authAdapter'
+import type {
+  LoginRequest,
+  LoginResponse,
+  RefreshTokenResponse,
+  RegisterRequest,
+  RegisterResponse,
+} from '@/types/auth'
 
-// import apiClient from './client'
+import apiClient from './client'
 
 /**
  * Authenticate a user with email and password.
- *
- * API-READY: Replace mock with:
- *   const { data } = await apiClient.post<LoginResponse>('/auth/login', credentials)
- *   return data
+ * API-READY: Only endpoint URL needs to change for production.
  */
-export async function loginUser(credentials: LoginRequest): Promise<LoginResponse> {
-  /** Mock implementation — remove when API is ready */
-  return {
-    user: {
-      id: 'usr-mock-1',
-      email: credentials.email,
-      name: 'Mock User',
-      role: 'user',
-    },
-    accessToken: 'mock-access-token',
-    refreshToken: 'mock-refresh-token',
-  }
+export async function loginUser(
+  credentials: LoginRequest,
+): Promise<LoginResponse> {
+  const { data } = await apiClient.post<RawLoginResponse>(
+    '/api/auth/login',
+    credentials,
+  )
+
+  return adaptLoginResponse(data)
 }
 
 /**
  * Register a new user account.
- *
- * API-READY: Replace mock with:
- *   const { data } = await apiClient.post<RegisterResponse>('/auth/register', payload)
- *   return data
+ * API-READY: Only endpoint URL needs to change for production.
  */
-export async function registerUser(payload: RegisterRequest): Promise<RegisterResponse> {
-  return {
-    user: {
-      id: 'usr-mock-2',
+export async function registerUser(
+  payload: RegisterRequest,
+): Promise<RegisterResponse> {
+  const { data } = await apiClient.post<RawRegisterResponse>(
+    '/api/auth/register',
+    {
+      first_name: payload.firstName,
+      last_name: payload.lastName,
       email: payload.email,
-      name: `${payload.firstName} ${payload.lastName}`,
-      role: 'user',
+      password: payload.password,
+      confirm_password: payload.confirmPassword,
+      phone: payload.phone,
     },
-    accessToken: 'mock-access-token',
-    refreshToken: 'mock-refresh-token',
-  }
+  )
+
+  return adaptRegisterResponse(data)
 }
 
 /**
  * Refresh the access token using a refresh token.
- *
- * API-READY: Replace mock with:
- *   const { data } = await apiClient.post<RefreshTokenResponse>('/auth/refresh', { refreshToken })
- *   return data
+ * API-READY: Only endpoint URL needs to change for production.
  */
-export async function refreshAccessToken(refreshToken: string): Promise<RefreshTokenResponse> {
-  void refreshToken
+export async function refreshAccessToken(
+  refreshToken: string,
+): Promise<RefreshTokenResponse> {
+  const { data } = await apiClient.post<RawRefreshTokenResponse>(
+    '/api/auth/refresh',
+    { refresh_token: refreshToken },
+  )
 
-  return {
-    accessToken: 'mock-new-access-token',
-    refreshToken: 'mock-new-refresh-token',
-  }
+  return adaptRefreshResponse(data)
 }
 
 /**
  * Logout the current user.
- *
- * API-READY: Replace mock with:
- *   await apiClient.post('/auth/logout')
+ * API-READY: Only endpoint URL needs to change for production.
  */
 export async function logoutUser(): Promise<void> {
-  /** Mock: no-op. API will invalidate server-side session */
+  await apiClient.post('/api/auth/logout')
 }

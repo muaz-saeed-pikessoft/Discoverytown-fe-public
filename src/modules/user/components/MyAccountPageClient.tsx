@@ -1,20 +1,21 @@
 'use client'
 
+import { useQuery } from '@tanstack/react-query'
 import type { AccountTab } from './types'
-
-import React, { useEffect, useRef, useState } from 'react'
-import Link from 'next/link'
-import { useRouter } from 'next/navigation'
-import { useSelector } from 'react-redux'
-import { toast } from 'react-toastify'
-import { useForm } from 'react-hook-form'
-import { yupResolver } from '@hookform/resolvers/yup'
-import * as yup from 'yup'
+import { getBookings } from '@/api/bookingApi'
 import { MOCK_BOOKINGS, MOCK_PROFILE } from '@/data/mockData'
-import { formatCurrency, formatShortDate } from '@/utils/formatters'
 import type { RootState } from '@/store/store'
 import type { BookingRecord } from '@/types/booking-types'
 import type { ProfileEditValues } from '@/types/form-types'
+import { formatShortDate } from '@/utils/formatters'
+import { yupResolver } from '@hookform/resolvers/yup'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
+import { useEffect, useRef, useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { useSelector } from 'react-redux'
+import { toast } from 'react-toastify'
+import * as yup from 'yup'
 import BookingTable from './BookingTable'
 
 const profileSchema = yup.object({
@@ -26,11 +27,22 @@ const profileSchema = yup.object({
 
 export default function MyAccountPageClient() {
   const router = useRouter()
-  const { isAuthenticated } = useSelector((state: RootState) => state.auth)
+  const { isAuthenticated, user } = useSelector((state: RootState) => state.auth)
   const [activeTab, setActiveTab] = useState<AccountTab>('upcoming')
   const [cancelTarget, setCancelTarget] = useState<BookingRecord | null>(null)
   const cancelModalRef = useRef<HTMLDialogElement>(null)
   const profileModalRef = useRef<HTMLDialogElement>(null)
+
+  const { data: bookings = [], isLoading } = useQuery({
+    queryKey: ['user', 'bookings'],
+    queryFn: () => getBookings({ order: 'desc' }),
+    enabled: isAuthenticated
+  })
+
+  // Extract first/last from name for the form
+  const nameParts = (user?.name || '').split(' ')
+  const firstName = nameParts[0] || ''
+  const lastName = nameParts.slice(1).join(' ') || ''
 
   const {
     register,
@@ -39,9 +51,9 @@ export default function MyAccountPageClient() {
   } = useForm<ProfileEditValues>({
     resolver: yupResolver(profileSchema),
     defaultValues: {
-      firstName: MOCK_PROFILE.firstName,
-      lastName: MOCK_PROFILE.lastName,
-      email: MOCK_PROFILE.email,
+      firstName: firstName || MOCK_PROFILE.firstName,
+      lastName: lastName || MOCK_PROFILE.lastName,
+      email: user?.email || MOCK_PROFILE.email,
       phone: MOCK_PROFILE.phone,
     },
   })
@@ -54,8 +66,8 @@ export default function MyAccountPageClient() {
 
   if (!isAuthenticated) return null
 
-  const upcomingBookings = MOCK_BOOKINGS.filter(b => b.status === 'confirmed' || b.status === 'waitlisted')
-  const historyBookings = MOCK_BOOKINGS.filter(b => b.status === 'completed' || b.status === 'cancelled')
+  const upcomingBookings = bookings.filter(b => b.status === 'confirmed' || b.status === 'waitlisted')
+  const historyBookings = bookings.filter(b => b.status === 'completed' || b.status === 'cancelled')
 
   function openCancelModal(booking: BookingRecord) {
     setCancelTarget(booking)
@@ -81,15 +93,14 @@ export default function MyAccountPageClient() {
             <div className='flex items-center gap-4'>
               <div className='avatar placeholder'>
                 <div className='w-16 rounded-full bg-primary text-primary-content'>
-                  <span className='text-xl font-bold'>
-                    {MOCK_PROFILE.firstName[0]}
-                    {MOCK_PROFILE.lastName[0]}
+                   <span className='text-xl font-bold'>
+                    {user?.name?.[0] || 'U'}
                   </span>
                 </div>
               </div>
               <div>
                 <h1 className='text-2xl font-bold text-base-content'>
-                  {MOCK_PROFILE.firstName} {MOCK_PROFILE.lastName}
+                  {user?.name || 'User Profile'}
                 </h1>
                 <div className='flex items-center gap-2 mt-0.5'>
                   <span
@@ -128,7 +139,7 @@ export default function MyAccountPageClient() {
               key={tab.id}
               type='button'
               className={`tab ${activeTab === tab.id ? 'tab-active' : ''}`}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => setActiveTab(tab.id as AccountTab)}
             >
               {tab.label}
             </button>
@@ -137,60 +148,68 @@ export default function MyAccountPageClient() {
 
         <div className='card card-bordered border-base-300 bg-base-100 shadow-sm'>
           <div className='card-body p-0 sm:p-4'>
-            {activeTab === 'upcoming' && (
-              <BookingTable bookings={upcomingBookings} activeTab={activeTab} openCancelModal={openCancelModal} />
-            )}
-            {activeTab === 'history' && <BookingTable bookings={historyBookings} activeTab={activeTab} />}
+            {isLoading ? (
+               <div className='flex items-center justify-center py-20'>
+                  <div className='h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent' />
+               </div>
+            ) : (
+               <>
+                  {activeTab === 'upcoming' && (
+                    <BookingTable bookings={upcomingBookings} activeTab={activeTab} openCancelModal={openCancelModal} />
+                  )}
+                  {activeTab === 'history' && <BookingTable bookings={historyBookings} activeTab={activeTab} />}
 
-            {activeTab === 'profile' && (
-              <div className='p-4 sm:p-0'>
-                <div className='grid grid-cols-1 gap-8 md:grid-cols-2'>
-                  <div>
-                    <h2 className='mb-4 text-lg font-bold text-base-content'>Personal Information</h2>
-                    <div className='space-y-3 text-sm'>
-                      <div className='flex justify-between border-b border-base-200 pb-2'>
-                        <span className='text-base-content/60'>Name</span>
-                        <span className='font-medium'>
-                          {MOCK_PROFILE.firstName} {MOCK_PROFILE.lastName}
-                        </span>
-                      </div>
-                      <div className='flex justify-between border-b border-base-200 pb-2'>
-                        <span className='text-base-content/60'>Email</span>
-                        <span className='font-medium'>{MOCK_PROFILE.email}</span>
-                      </div>
-                      <div className='flex justify-between border-b border-base-200 pb-2'>
-                        <span className='text-base-content/60'>Phone</span>
-                        <span className='font-medium'>{MOCK_PROFILE.phone}</span>
-                      </div>
-                      <div className='flex justify-between border-b border-base-200 pb-2'>
-                        <span className='text-base-content/60'>Membership</span>
-                        <span className='font-medium capitalize'>{MOCK_PROFILE.membershipType}</span>
+                  {activeTab === 'profile' && (
+                    <div className='p-4 sm:p-0'>
+                      <div className='grid grid-cols-1 gap-8 md:grid-cols-2'>
+                        <div>
+                          <h2 className='mb-4 text-lg font-bold text-base-content'>Personal Information</h2>
+                          <div className='space-y-3 text-sm'>
+                            <div className='flex justify-between border-b border-base-200 pb-2'>
+                              <span className='text-base-content/60'>Name</span>
+                              <span className='font-medium'>
+                                {user?.name}
+                              </span>
+                            </div>
+                            <div className='flex justify-between border-b border-base-200 pb-2'>
+                              <span className='text-base-content/60'>Email</span>
+                              <span className='font-medium'>{user?.email}</span>
+                            </div>
+                            <div className='flex justify-between border-b border-base-200 pb-2'>
+                              <span className='text-base-content/60'>Phone</span>
+                              <span className='font-medium'>{MOCK_PROFILE.phone}</span>
+                            </div>
+                            <div className='flex justify-between border-b border-base-200 pb-2'>
+                              <span className='text-base-content/60'>Membership</span>
+                              <span className='font-medium capitalize'>{MOCK_PROFILE.membershipType}</span>
+                            </div>
+                          </div>
+                          <button
+                            className='btn btn-outline btn-sm mt-4'
+                            type='button'
+                            onClick={() => profileModalRef.current?.showModal()}
+                          >
+                            Edit Profile
+                          </button>
+                        </div>
+
+                        <div>
+                          <h2 className='mb-4 text-lg font-bold text-base-content'>Account Statistics</h2>
+                          <div className='grid grid-cols-2 gap-3'>
+                            <div className='stat rounded-xl bg-base-200 p-4'>
+                              <div className='stat-title text-xs'>Total Bookings</div>
+                              <div className='stat-value text-2xl'>{bookings.length}</div>
+                            </div>
+                            <div className='stat rounded-xl bg-base-200 p-4'>
+                              <div className='stat-title text-xs'>Upcoming</div>
+                              <div className='stat-value text-2xl'>{upcomingBookings.length}</div>
+                            </div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                    <button
-                      className='btn btn-outline btn-sm mt-4'
-                      type='button'
-                      onClick={() => profileModalRef.current?.showModal()}
-                    >
-                      Edit Profile
-                    </button>
-                  </div>
-
-                  <div>
-                    <h2 className='mb-4 text-lg font-bold text-base-content'>Account Statistics</h2>
-                    <div className='grid grid-cols-2 gap-3'>
-                      <div className='stat rounded-xl bg-base-200 p-4'>
-                        <div className='stat-title text-xs'>Total Bookings</div>
-                        <div className='stat-value text-2xl'>{MOCK_BOOKINGS.length}</div>
-                      </div>
-                      <div className='stat rounded-xl bg-base-200 p-4'>
-                        <div className='stat-title text-xs'>Upcoming</div>
-                        <div className='stat-value text-2xl'>{upcomingBookings.length}</div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+                  )}
+               </>
             )}
 
             {activeTab === 'guests' && (

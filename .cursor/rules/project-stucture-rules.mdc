@@ -1,0 +1,354 @@
+---
+description: Next.js frontend rules — applied to all files in playspace-web repo
+globs: ["src/**/*.ts", "src/**/*.tsx", "src/**/*.css"]
+alwaysApply: true
+---
+
+# PlaySpace Web — Cursor AI Rules
+# Next.js 14 App Router + TypeScript + Tailwind + shadcn/ui
+# Redux Toolkit (UI/auth state) + React Query (server state)
+# Dual-portal: (user) public portal + (admin) staff portal in one repo
+
+## IDENTITY & CONTEXT
+This repo contains TWO portals that must stay architecturally isolated:
+- User portal: customer-facing booking and activity pages
+- Admin portal: staff-facing management dashboard
+
+Both portals will eventually be split into separate repos.
+Every decision must respect this future split.
+Priority order: Security → Correctness → Separation of concerns → DX
+
+---
+
+## PORTAL ISOLATION — MOST IMPORTANT RULE
+
+The single most important architectural rule in this codebase:
+
+  src/portal/admin/ MUST NEVER import from src/portal/user/
+  src/portal/user/  MUST NEVER import from src/portal/admin/
+  src/app/(admin)/  MUST NEVER import from src/portal/user/
+  src/app/(user)/   MUST NEVER import from src/portal/admin/
+
+Shared code lives ONLY in:
+  src/components/shared/    → UI components used by both portals
+  src/components/ui/        → shadcn/ui components
+  src/components/layout/    → Navbar, Footer
+  src/lib/                  → API client, auth, validations, utils
+  src/hooks/                → global hooks
+  src/types/                → shared TypeScript types
+  src/constants/            → query keys, routes
+  src/store/                → Redux store (shared slices only)
+
+When adding any new file, ask: "Does this belong to user portal, admin portal, or both?"
+If only one portal: it goes in src/portal/[portal]/
+If both: it goes in src/components/shared/ or src/lib/
+
+---
+
+## PROJECT STRUCTURE — ENFORCED
+
+New files go in these locations only — never invent new top-level folders:
+
+  src/app/(user)/[route]/         → user portal pages
+  src/app/(admin)/[route]/        → admin portal pages
+  src/app/(auth)/[route]/         → auth pages (shared)
+  src/portal/user/components/     → user-only components
+  src/portal/user/features/       → user-only hooks and types
+  src/portal/admin/components/    → admin-only components
+  src/portal/admin/features/[module]/
+    components/                   → module components
+    hooks/                        → module React Query hooks
+    types/                        → module TypeScript types
+    constants.ts                  → module constants and enums
+  src/components/shared/          → shared components (both portals)
+  src/components/ui/              → shadcn only — never edit these files
+  src/lib/api/admin/[module].api.ts → admin API functions
+  src/lib/api/user/[resource].api.ts → user API functions
+  src/lib/validations/admin/      → admin Zod schemas
+  src/lib/validations/user/       → user Zod schemas
+  src/hooks/                      → global hooks
+  src/store/slices/               → Redux slices
+  src/types/                      → global types
+  src/constants/                  → global constants
+
+---
+
+## NAMING CONVENTIONS
+
+Components:        PascalCase          → FamilyProfileHeader.tsx
+Files:             kebab-case          → family-profile-header.tsx
+React Query hooks: camelCase, use      → useFamilies, useCreateBooking
+Redux selectors:   camelCase, select   → selectAuthUser, selectSidebarCollapsed
+Redux actions:     camelCase, verb     → setAuthUser, toggleSidebar
+API functions:     camelCase, verb     → getBookings, cancelBooking, createFamily
+Zod schemas:       camelCase, Schema   → createBookingSchema, loginSchema
+Types:             PascalCase          → Family, StaffUser, BookingStatus
+Enums:             PascalCase name, SCREAMING values → BookingStatus.CONFIRMED
+Query key arrays:  from QUERY_KEYS constants only — never inline
+Route paths:       from ROUTES constants only — never hardcode strings
+Constants:         SCREAMING_SNAKE_CASE → MAX_FILE_SIZE_MB
+
+---
+
+## TYPESCRIPT — STRICT
+
+- strict: true — no any, no type assertions without comment, no non-null assertions
+- All component props: named interface above component → FamilyCardProps
+- All API return types: explicitly typed — never infer from any
+- All form values: z.infer<typeof schema> — never manually typed separately
+- All event handlers: use React types → React.ChangeEvent<HTMLInputElement>
+- All children: React.ReactNode — never JSX.Element or any
+- Never use object as a type — define the shape
+
+---
+
+## STATE MANAGEMENT
+
+### Rule: what goes where
+  Redux store:
+    - Auth state: current user, session, roles (authSlice)
+    - Booking flow state: multi-step form, cart, checkout (bookingSlice)
+    - User profile state: preferences (userSlice)
+    - UI state: sidebar open/closed, theme, date range filter (uiSlice)
+    NEVER put server data (API responses) in Redux
+
+  React Query:
+    - ALL data fetched from the API
+    - Mutations with automatic cache invalidation
+    - Paginated lists
+    NEVER store server data in Redux
+
+  Local state (useState):
+    - Component-level UI state (modal open, tab active, input value)
+    - State that dies with the component
+
+  URL state (search params):
+    - Filter values, pagination, tab selection that should survive refresh
+    Use the nuqs library for typed URL state
+
+### Redux rules
+  - Never access Redux state directly in components — use typed selector hooks
+  - Selectors defined in slice file: export const selectX = (state: RootState) => state.x.y
+  - Never dispatch in useEffect without a clear dependency — causes infinite loops
+  - Async thunks: only for non-API state (e.g., reading from localStorage)
+    For API calls: use React Query mutations and queries, not thunks
+  - Never put sensitive data (tokens, secrets) in Redux state — it's accessible via DevTools
+
+### React Query rules
+  - Query keys: ALWAYS from QUERY_KEYS constants — never inline arrays
+  - staleTime: explicitly set on every useQuery
+      List data: 30_000ms, Detail: 60_000ms, Reference data: 300_000ms
+  - Mutations: ALWAYS invalidate relevant query keys in onSuccess
+  - Error handling: ALWAYS handle onError in mutations → toast.error(getApiErrorMessage(e))
+  - Never fetch in useEffect — always useQuery
+  - never derive state from useQuery in useEffect — compute inline or use useMemo
+  - enabled: !!id — never call a query with undefined ID
+
+---
+
+## COMPONENTS
+
+### Rules
+  - Functional components only — no class components
+  - One default export per file = the component
+  - Props interface defined above component in same file
+  - No prop drilling beyond 2 levels — use store or context
+  - No API calls in components — use React Query hooks
+  - No business logic in components — hooks or utils
+  - Max file length: 200 lines — extract sub-components if longer
+
+### Component checklist — every data-dependent component needs:
+  - Loading state → LoadingSkeleton variant
+  - Error state → ErrorState with retry
+  - Empty state → EmptyState with CTA
+  - Never render "nothing" for these states — always show something meaningful
+
+### shadcn/ui usage
+  - Use shadcn components from src/components/ui/ — never edit these files directly
+  - Extend by wrapping, not by modifying source
+  - CORRECT:   <Button className="w-full" {...props} />  (new wrapper component)
+  - INCORRECT: edit src/components/ui/button.tsx
+
+### Existing components — respect these
+  - src/components/shared/: existing components are stable — extend, don't replace
+  - src/components/user/cafeFood/, classes/, events/, etc.: working UI — do not rewrite
+  - src/components/admin/AdminHeader.tsx, AdminSidebar.tsx: update (add nav items), don't replace
+
+---
+
+## FORMS (React Hook Form + Zod)
+
+  - Every form: useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema) })
+  - Schema in src/lib/validations/[portal]/[module].validations.ts — never inline in component
+  - Error display: FormField + FormMessage from shadcn — never manual
+  - Submit: async (values) — always typed, never any
+  - Required strings: z.string().min(1, 'Required') — not just z.string()
+  - Money: z.number().min(0).multipleOf(0.01) — never free text
+  - Never put submit logic in the component — call a mutation hook
+  - Dirty form navigation: warn user with ConfirmDialog before navigating away
+
+---
+
+## API LAYER
+
+  - Single axios instance: src/api/client.ts — never create another
+  - API functions: src/lib/api/admin/ and src/lib/api/user/ — pure async, no hooks
+  - Never call axios directly from a component or hook — always via API function files
+  - Error extraction: always use getApiErrorMessage() from src/lib/api/errors.ts
+  - Never catch errors in API function files — let React Query's onError handle them
+  - Request timeout: 30_000ms on all requests
+  - Unwrap API envelope: return response.data.data (the actual payload), not the full envelope
+
+---
+
+## ROUTING & NAVIGATION
+
+  - Route paths: ALWAYS from ROUTES constants in src/constants/routes.ts
+    CORRECT:   router.push(ROUTES.ADMIN.SCHEDULING)
+    INCORRECT: router.push('/admin/scheduling')
+  - Internal links: Next.js <Link> — never <a href>
+  - Programmatic navigation: router.push() after mutations, router.replace() for redirects
+  - Protected routes: handled in src/middleware.ts — never replicate auth checks in pages
+  - Admin routes: ALL protected by middleware checking next-auth staff session
+  - User account routes (/my-account): protected by middleware checking legacy user session
+
+---
+
+## SECURITY — NON-NEGOTIABLE
+
+  Token storage:
+    - Staff access token: next-auth encrypted session cookie — never localStorage
+    - Legacy user token: keep existing pattern (not changing)
+    - NEVER store any access token in localStorage, sessionStorage, or Redux state
+
+  Environment variables:
+    - All process.env access through src/config/env.ts ONLY
+    - NEXT_PUBLIC_ = safe to expose to browser — no secrets ever
+    - If it's a secret: no NEXT_PUBLIC_ prefix, server-side only
+
+  XSS:
+    - dangerouslySetInnerHTML: ESLint warning on every use — requires DOMPurify sanitization
+    - User-provided URLs in href: validate before rendering — isValidUrl() check
+    - External links: always rel="noopener noreferrer"
+
+  Role-based rendering:
+    - Use useHasRole() hook — never inline session?.user?.role === 'X' in JSX
+    - Role checks in UI are defense-in-depth only — backend enforces authorization
+    - Hide elements from unauthorized roles, but don't rely on hiding for security
+
+  Forms:
+    - File uploads: validate type and size client-side in FileUpload component before upload
+    - Never disable autocomplete globally — only on OTP/security-code fields
+
+---
+
+## TAILWIND CSS
+
+  - Utility classes only — no custom CSS unless Tailwind cannot achieve it
+  - Custom CSS: styles/globals.css only — no <style> tags in components
+  - Inline style: only for values requiring JS calculation (e.g., dynamic widths)
+  - Responsive: mobile-first — base classes for mobile, md: tablet, lg: desktop
+  - Dark mode: dark: variant on every color — never hardcode dark colors
+  - Colors:
+      Semantic: bg-background, text-foreground, border (from shadcn theme)
+      Brand/accent: Tailwind palette with dark: variants
+      Never: arbitrary values like w-[347px] — use standard scale
+  - Class merging: always cn() from src/lib/utils — never string concatenation
+  - Class order: Prettier Tailwind plugin order — layout → size → spacing → typography → color
+
+---
+
+## ACCESSIBILITY
+
+  - Every interactive element: keyboard accessible (tab + Enter/Space)
+  - Every image: meaningful alt or alt="" for decorative
+  - Every form input: associated label (htmlFor or wrapped)
+  - Every icon-only button: aria-label
+  - Never remove :focus-visible outline — restyle only
+  - Color: never as sole conveyor of meaning — pair with text or icon
+  - Modals: use shadcn Dialog (handles focus trap + aria-modal)
+  - Tables: proper <table>, <thead>, <th scope> — never div-based tables
+
+---
+
+## ERROR HANDLING & UX
+
+  Loading: layout-matched skeletons — never generic spinners for full-page loads
+  Errors: ErrorState with retry button — never blank screen
+  Empty: EmptyState with CTA — never empty table with just headers
+  Mutations: toast on error via React Query onError — never show raw API error
+  Forms: inline error messages — not just toasts
+  Network offline: useNetworkStatus hook → show banner
+  Toast config: success 3s, error 5s — react-hot-toast from root layout
+
+---
+
+## ADMIN PORTAL SPECIFIC RULES
+
+  - Admin pages live in src/app/(admin)/ — always protected by StaffGuard
+  - Admin components live in src/portal/admin/features/[module]/components/
+  - Admin hooks live in src/portal/admin/features/[module]/hooks/
+  - AdminShell wraps every admin page — never build a custom layout per admin page
+  - Sidebar navigation: role-based visibility via useHasRole() — not if/else per role
+  - Global date range and location filter: from Redux uiSlice — consistent across all report pages
+  - Never hardcode organization ID — always from session.user.organizationId
+
+---
+
+## USER PORTAL SPECIFIC RULES
+
+  - User pages live in src/app/(user)/ — public unless account-specific
+  - User components live in src/portal/user/components/ — never import admin code
+  - Existing user-facing pages: do not rewrite — extend or wrap
+  - Public pages (no auth required): /, /book, /events, /gym, /play, /learn, /rentals, /contact
+  - Account pages (/my-account): require user session — handled by middleware
+
+---
+
+## CODE QUALITY
+
+  Max lengths: components 200 lines, hooks 100 lines, API files 150 lines per module
+  
+  Always use:
+    Early returns over nested conditionals
+    Optional chaining (?.) over manual null checks  
+    Nullish coalescing (??) over || for defaults
+    const over let everywhere possible
+    Named exports from non-component files
+  
+  Never use:
+    Default exports from hooks, utils, stores, API files — named exports only
+    Barrel index.ts files — causes circular dependency issues
+    useEffect for data fetching — use React Query
+    useEffect for derived state — compute inline
+    console.log in committed code — use proper error boundaries and monitoring
+    Prop spreading onto DOM elements (<div {...props}>) — causes DOM attribute warnings
+
+---
+
+## EXISTING CODE — RESPECT THESE RULES
+
+  DO NOT rewrite: any existing page under src/app/(user)/
+  DO NOT rewrite: any component under src/components/user/ (now src/portal/user/components/)
+  DO NOT change:  existing Redux store slice shapes (authSlice, bookingSlice, userSlice)
+  DO NOT delete:  any MSW mock handler in src/mocks/
+  DO NOT modify:  src/components/ui/ (shadcn generated)
+
+  When you need to change existing behavior:
+    Wrap, extend, or add alongside — never replace working code
+    If a rewrite is genuinely necessary: document why in a code comment
+
+---
+
+## GIT & COMMITS
+
+  Format: type(scope): description
+    feat(admin/scheduling): add event creation multi-step form
+    feat(user/booking): add booking confirmation page
+    fix(admin/clients): prevent duplicate family on double-submit
+    security(auth): store staff token in httpOnly cookie
+    refactor(shared): extract DataTable to shared components
+    
+  Types: feat, fix, security, refactor, test, docs, style, a11y, perf, chore
+  Never commit: .env.local, API keys, tokens, node_modules, .next/
+  Every PR: must pass tsc --noEmit, ESLint, Prettier check

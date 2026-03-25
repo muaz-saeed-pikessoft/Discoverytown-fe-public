@@ -1,13 +1,19 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { getCommerceItems } from '@/api/commerceApi'
+import ActionLink from '@/components/shared/ActionLink'
+import FlowSteps from '@/components/shared/FlowSteps'
+import Hero from '@/components/shared/Hero'
+import SectionHeader from '@/components/shared/SectionHeader'
+import SectionNav from '@/components/shared/SectionNav'
+import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
-
+import { useEffect, useMemo, useState } from 'react'
 import {
+  BAKED_FOOD,
   COLD_DRINKS,
   DELIVERY_OPTIONS,
   FROZEN_TREATS,
-  HERO_PILLS,
   HOT_DRINKS,
   KIDS_CORNER,
   NAV_SECTIONS,
@@ -17,27 +23,29 @@ import {
   SANDWICHES,
   SNACKS,
   SWEETS,
+  TOASTS,
 } from './constants'
+import { normalizeRows } from './pageHelpers'
 import DeliveryCards from './DeliveryCards'
 import MenuBoard from './MenuBoard'
 import MenuCard from './MenuCard'
-import { BLUE, CORAL, INPUT_CLASS, MINT, SECTION_CLASS } from './pageConstants'
-import { normalizeRows } from './pageHelpers'
+import OrderPanel from './OrderPanel'
+import { BLUE, CORAL, MINT, SECTION_CLASS } from './pageConstants'
 import type { CartItem, MenuRow, OrderFormState } from './pageTypes'
 import TakeoutCard from './TakeoutCard'
 import type { CafeSection } from './types'
-import OrderPanel from './OrderPanel'
-import Hero from '@/components/shared/Hero'
-import ActionLink from '@/components/shared/ActionLink'
-import FlowSteps from '@/components/shared/FlowSteps'
-import SectionHeader from '@/components/shared/SectionHeader'
-import SectionNav from '@/components/shared/SectionNav'
 
 export default function CafeFoodPageClient() {
   const [activeSection, setActiveSection] = useState<CafeSection>('drinks')
   const [cart, setCart] = useState<Record<string, CartItem>>({})
   const [showOrderPanel, setShowOrderPanel] = useState(false)
   const [orderSent, setOrderSent] = useState(false)
+
+  const { data: products = [], isLoading } = useQuery({
+    queryKey: ['commerce', 'cafe'],
+    queryFn: () => getCommerceItems('cafe'),
+    staleTime: 30_000,
+  })
 
   const [orderForm, setOrderForm] = useState<OrderFormState>({
     name: '',
@@ -73,58 +81,77 @@ export default function CafeFoodPageClient() {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
-  const drinkBoards = useMemo(
-    () => [
-      {
-        title: 'Hot Drinks',
-        subtitle: 'Coffee bar, teas & cozy cups',
-        accent: CORAL,
-        rows: normalizeRows(HOT_DRINKS, 3.95, 'hot-drinks'),
-      },
-      {
-        title: 'Cold Drinks',
-        subtitle: 'Fresh juices, soda & sparkling',
-        accent: CORAL,
-        rows: normalizeRows(COLD_DRINKS, 2.95, 'cold-drinks'),
-      },
-      {
-        title: 'Frozen & Smoothies',
-        subtitle: 'Milkshakes, sundaes & blended treats',
-        accent: CORAL,
-        rows: normalizeRows(FROZEN_TREATS, 4.95, 'frozen'),
-      },
-    ],
-    []
-  )
-
-  const sandwichRows = useMemo(
-    () =>
-      normalizeRows(
-        SANDWICHES.flatMap(group => group.items.map(item => ({ ...item, desc: `${item.desc} (${group.category})` }))),
-        8.95,
-        'sandwiches'
-      ),
-    []
-  )
-
-  const foodCards = useMemo(() => {
-    const cards = [
-      ...normalizeRows(PIZZAS.slice(0, 4), 10.5, 'pizza'),
-      ...normalizeRows([...PASTRIES.slice(0, 2), ...SWEETS.slice(0, 2)], 4.25, 'bakery'),
-      ...normalizeRows(sandwichRows.slice(0, 3), 8.75, 'sandwich'),
-      ...normalizeRows([...KIDS_CORNER.slice(0, 1), ...SALADS.slice(0, 1), ...SNACKS.slice(0, 1)], 5.5, 'light'),
+  const drinkBoards = useMemo(() => {
+    const categories = [
+      { key: 'hot-drinks', title: 'Hot Drinks', sub: 'Coffee bar, teas & cozy cups', fallback: HOT_DRINKS, base: 3.5 },
+      { key: 'cold-drinks', title: 'Cold Drinks', sub: 'Fresh juices, soda & sparkling', fallback: COLD_DRINKS, base: 3.75 },
+      { key: 'frozen', title: 'Frozen & Smoothies', sub: 'Milkshakes, sundaes & blended treats', fallback: FROZEN_TREATS, base: 4.25 },
     ]
 
+    return categories.map(cat => {
+      const apiRows = products
+        .filter(p => p.tags.includes(cat.key))
+        .map(p => ({
+          id: p.id,
+          name: p.name,
+          detail: p.description,
+          price: p.price,
+          priceLabel: `$${p.price.toFixed(2)}`,
+          category: cat.key,
+          img: p.image,
+        }))
+
+      return {
+        title: cat.title,
+        subtitle: cat.sub,
+        accent: CORAL,
+        rows: apiRows.length > 0 ? apiRows : normalizeRows(cat.fallback, cat.base, cat.key),
+      }
+    })
+  }, [products])
+
+  const foodCards = useMemo(() => {
     const accents = [CORAL, BLUE, MINT]
+    const apiFood = products.filter(p => p.tags.includes('food'))
 
-    return cards.map((item, index) => ({
-      ...item,
-      image: item.img,
+    if (apiFood.length > 0) {
+      return apiFood.map((p, index) => ({
+        id: p.id,
+        name: p.name,
+        detail: p.description,
+        price: p.price,
+        priceLabel: `$${p.price.toFixed(2)}`,
+        image: p.image,
+        accent: accents[index % accents.length],
+        badge: p.popular ? 'Bestseller' : undefined,
+      }))
+    }
+
+    const fallbackRows = [
+      ...normalizeRows(PIZZAS.map(p => ({ name: p.name, desc: p.desc, badge: p.badge })), 8.5, 'pizza'),
+      ...normalizeRows(SANDWICHES.flatMap(g => g.items.map(i => ({ name: i.name, desc: i.desc }))), 7.5, 'sandwich'),
+      ...normalizeRows(TOASTS, 5.75, 'toasts'),
+      ...normalizeRows(KIDS_CORNER, 4.95, 'kids'),
+      ...normalizeRows(SALADS, 6.95, 'salads'),
+      ...normalizeRows(SNACKS, 2.95, 'snacks'),
+      ...normalizeRows(PASTRIES, 3.25, 'bakery'),
+      ...normalizeRows(SWEETS, 2.95, 'sweets'),
+      ...normalizeRows(BAKED_FOOD, 4.25, 'baked'),
+    ]
+
+    return fallbackRows.map((row, index) => ({
+      id: row.id,
+      name: row.name,
+      detail: row.detail,
+      price: row.price,
+      priceLabel: row.priceLabel,
+      image: row.img ?? '',
       accent: accents[index % accents.length],
+      badge: row.badge,
     }))
-  }, [sandwichRows])
+  }, [products])
 
-  function handleAddItem(item: MenuRow) {
+  function handleAddItem(item: MenuRow | any) {
     setOrderSent(false)
     setCart(prev => {
       const current = prev[item.id]
@@ -218,133 +245,141 @@ export default function CafeFoodPageClient() {
       <SectionNav items={NAV_SECTIONS} active={activeSection} onNav={scrollToSection} />
 
       <div className='max-w-[1200px] mx-auto px-6 py-8 pb-28 flex flex-col gap-5'>
-        <FlowSteps
-          eyebrow='How Ordering Works'
-          title='Browse, add items, then submit the cafe order'
-          description='Cafe and food now has a visible purchase path. Families can browse the menu, build the cart, and finish the request in one frontend flow.'
-          accentColor='var(--dt-teal)'
-          primaryHref='#drinks'
-          primaryLabel='Start Building Order'
-          secondaryHref={itemCount > 0 ? '#order' : '#delivery'}
-          secondaryLabel={itemCount > 0 ? 'Jump to Order' : 'See Catering'}
-          steps={[
-            {
-              title: 'Build the cart',
-              description: 'Add drinks, food, and treats from the menu boards and item cards.',
-            },
-            {
-              title: 'Choose fulfillment',
-              description: 'Set pickup or delivery, preferred timing, and add any allergy or event notes.',
-            },
-            {
-              title: 'Submit the request',
-              description: 'Review totals in the order panel and send the frontend cafe request.',
-            },
-          ]}
-        />
-
-        <section id='drinks' className={SECTION_CLASS}>
-          <SectionHeader
-            eyebrow='Drinks Menu'
-            title='Cafe Menu Board'
-            description='Tap Add on any item — your cart builds instantly. Adjust quantities when you proceed.'
-          />
-          <div className='grid grid-cols-1 gap-4'>
-            {drinkBoards.map(board => (
-              <MenuBoard
-                key={board.title}
-                {...board}
-                cartQty={cartQtyMap}
-                onAdd={handleAddItem}
-                onRemove={row => handleQuantity(row.id, (cartQtyMap[row.id] ?? 0) - 1)}
-              />
-            ))}
+        {isLoading ? (
+          <div className='flex items-center justify-center py-20'>
+            <div className='h-8 w-8 animate-spin rounded-full border-4 border-[var(--dt-teal)] border-t-transparent' />
           </div>
-        </section>
-
-        <section id='food' className={SECTION_CLASS}>
-          <SectionHeader
-            eyebrow='Food Menu'
-            title='All-Day Kitchen Favorites'
-            description='Premium card-style menu with image-first dishes, clean pricing, and quick add actions.'
-          />
-          <div className='grid grid-cols-3 gap-4 max-lg:grid-cols-2 max-md:grid-cols-1'>
-            {foodCards.map(item => (
-              <MenuCard
-                key={item.id}
-                item={{
-                  name: item.name,
-                  desc: item.detail || 'Chef-crafted and freshly prepared.',
-                  priceLabel: item.priceLabel,
-                  badge: item.badge,
-                  image: item.image,
-                }}
-                accent={item.accent}
-                qty={cartQtyMap[item.id] ?? 0}
-                onAdd={() => handleAddItem(item)}
-                onRemove={() => handleQuantity(item.id, (cartQtyMap[item.id] ?? 0) - 1)}
-              />
-            ))}
-          </div>
-        </section>
-
-        <section id='takeout' className={SECTION_CLASS}>
-          <SectionHeader
-            eyebrow='Take Out'
-            title='Counter Pickup'
-            description='Quick grab-and-go flow with full menu access and family-size packaging.'
-          />
-          <TakeoutCard />
-        </section>
-
-        <section id='delivery' className={SECTION_CLASS}>
-          <SectionHeader
-            eyebrow='Delivery & Catering'
-            title='We Bring the Cafe to You'
-            description='Office lunches, birthday tables, or school events — custom menus and easy booking.'
-          />
-
-          <DeliveryCards options={DELIVERY_OPTIONS} />
-
-          <div className='mt-5 rounded-xl bg-[var(--dt-dark)] px-7 py-6 flex items-center justify-between gap-4 flex-wrap'>
-            <div>
-              <p className='dt-font-heading text-[21px] font-black text-white leading-[1.2] mb-1'>
-                Plan your food setup in minutes
-              </p>
-              <p className='text-[13px] text-white/55'>
-                Fast response, package options, and setup support for your event.
-              </p>
-            </div>
-            <Link
-              href='/contact'
-              className='inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--dt-teal)] text-white text-[14px] font-bold no-underline transition-all duration-200 hover:bg-[var(--dt-teal-dark)] whitespace-nowrap'
-            >
-              Contact Catering
-            </Link>
-          </div>
-        </section>
-
-        {(showOrderPanel || itemCount > 0) && (
-          <section id='order' className={SECTION_CLASS}>
-            <SectionHeader
-              eyebrow='Your Order'
-              title='Review, Set Quantity & Proceed'
-              description='Adjust item quantities, fill in your details, and submit your order request.'
+        ) : (
+          <>
+            <FlowSteps
+              eyebrow='How Ordering Works'
+              title='Browse, add items, then submit the cafe order'
+              description='Cafe and food now has a visible purchase path. Families can browse the menu, build the cart, and finish the request in one frontend flow.'
+              accentColor='var(--dt-teal)'
+              primaryHref='#drinks'
+              primaryLabel='Start Building Order'
+              secondaryHref={itemCount > 0 ? '#order' : '#delivery'}
+              secondaryLabel={itemCount > 0 ? 'Jump to Order' : 'See Catering'}
+              steps={[
+                {
+                  title: 'Build the cart',
+                  description: 'Add drinks, food, and treats from the menu boards and item cards.',
+                },
+                {
+                  title: 'Choose fulfillment',
+                  description: 'Set pickup or delivery, preferred timing, and add any allergy or event notes.',
+                },
+                {
+                  title: 'Submit the request',
+                  description: 'Review totals in the order panel and send the frontend cafe request.',
+                },
+              ]}
             />
 
-            <OrderPanel
-              cartItems={cartItems}
-              itemCount={itemCount}
-              subtotal={subtotal}
-              serviceFee={serviceFee}
-              total={total}
-              orderForm={orderForm}
-              setOrderForm={setOrderForm}
-              handleQuantity={handleQuantity}
-              submitOrder={submitOrder}
-              orderSent={orderSent}
-            />
-          </section>
+            <section id='drinks' className={SECTION_CLASS}>
+              <SectionHeader
+                eyebrow='Drinks Menu'
+                title='Cafe Menu Board'
+                description='Tap Add on any item — your cart builds instantly. Adjust quantities when you proceed.'
+              />
+              <div className='grid grid-cols-1 gap-4'>
+                {drinkBoards.map(board => (
+                  <MenuBoard
+                    key={board.title}
+                    {...board}
+                    cartQty={cartQtyMap}
+                    onAdd={handleAddItem}
+                    onRemove={row => handleQuantity(row.id, (cartQtyMap[row.id] ?? 0) - 1)}
+                  />
+                ))}
+              </div>
+            </section>
+
+            <section id='food' className={SECTION_CLASS}>
+              <SectionHeader
+                eyebrow='Food Menu'
+                title='All-Day Kitchen Favorites'
+                description='Premium card-style menu with image-first dishes, clean pricing, and quick add actions.'
+              />
+              <div className='grid grid-cols-3 gap-4 max-lg:grid-cols-2 max-md:grid-cols-1'>
+                {foodCards.map(item => (
+                  <MenuCard
+                    key={item.id}
+                    item={{
+                      name: item.name,
+                      desc: item.detail || 'Chef-crafted and freshly prepared.',
+                      priceLabel: item.priceLabel,
+                      badge: item.badge,
+                      image: item.image,
+                    }}
+                    accent={item.accent}
+                    qty={cartQtyMap[item.id] ?? 0}
+                    onAdd={() => handleAddItem(item)}
+                    onRemove={() => handleQuantity(item.id, (cartQtyMap[item.id] ?? 0) - 1)}
+                  />
+                ))}
+              </div>
+            </section>
+
+            <section id='takeout' className={SECTION_CLASS}>
+              <SectionHeader
+                eyebrow='Take Out'
+                title='Counter Pickup'
+                description='Quick grab-and-go flow with full menu access and family-size packaging.'
+              />
+              <TakeoutCard />
+            </section>
+
+            <section id='delivery' className={SECTION_CLASS}>
+              <SectionHeader
+                eyebrow='Delivery & Catering'
+                title='We Bring the Cafe to You'
+                description='Office lunches, birthday tables, or school events — custom menus and easy booking.'
+              />
+
+              <DeliveryCards options={DELIVERY_OPTIONS} />
+
+              <div className='mt-5 rounded-xl bg-[var(--dt-dark)] px-7 py-6 flex items-center justify-between gap-4 flex-wrap'>
+                <div>
+                  <p className='dt-font-heading text-[21px] font-black text-white leading-[1.2] mb-1'>
+                    Plan your food setup in minutes
+                  </p>
+                  <p className='text-[13px] text-white/55'>
+                    Fast response, package options, and setup support for your event.
+                  </p>
+                </div>
+                <Link
+                  href='/contact'
+                  className='inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--dt-teal)] text-white text-[14px] font-bold no-underline transition-all duration-200 hover:bg-[var(--dt-teal-dark)] whitespace-nowrap'
+                >
+                  Contact Catering
+                </Link>
+              </div>
+            </section>
+
+            {(showOrderPanel || itemCount > 0) && (
+              <section id='order' className={SECTION_CLASS}>
+                <SectionHeader
+                  eyebrow='Your Order'
+                  title='Review, Set Quantity & Proceed'
+                  description='Adjust item quantities, fill in your details, and submit your order request.'
+                />
+
+                <OrderPanel
+                  cartItems={cartItems}
+                  itemCount={itemCount}
+                  subtotal={subtotal}
+                  serviceFee={serviceFee}
+                  total={total}
+                  orderForm={orderForm}
+                  setOrderForm={setOrderForm}
+                  handleQuantity={handleQuantity}
+                  submitOrder={submitOrder}
+                  orderSent={orderSent}
+                />
+              </section>
+            )}
+          </>
         )}
       </div>
 

@@ -71,6 +71,12 @@ function removeCookie(name: string): void {
 function createApiClient(): AxiosInstance {
   const instance = axios.create({
     baseURL: ENV.API_BASE_URL,
+    /**
+     * Force the Fetch API adapter so MSW's service worker can intercept
+     * requests in development. Axios defaults to XMLHttpRequest (XHR) which
+     * service workers cannot intercept — switching to fetch fixes this.
+     */
+    adapter: 'fetch',
     timeout: 30000,
     headers: {
       'Content-Type': 'application/json',

@@ -1,7 +1,8 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-
+import { useQuery } from '@tanstack/react-query'
+import { getClasses } from '@/api/bookingApi'
 import { NAV_SECTIONS, TIERS, WHY_ITEMS } from './constants'
 import type { LearnSection } from './types'
 import Hero from '@/components/shared/Hero'
@@ -20,6 +21,11 @@ import EnrichmentSection from './EnrichmentSection'
 
 export default function LearnPageClient() {
   const [activeSection, setActiveSection] = useState<LearnSection>('core-academic')
+
+  const { isLoading } = useQuery({
+    queryKey: ['booking', 'classes', 'learn'],
+    queryFn: getClasses,
+  })
 
   function scrollToSection(id: LearnSection) {
     setActiveSection(id)
@@ -40,7 +46,6 @@ export default function LearnPageClient() {
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
-
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
@@ -65,68 +70,76 @@ export default function LearnPageClient() {
       <SectionNav items={NAV_SECTIONS} active={activeSection} onNav={scrollToSection} />
 
       <div className='max-w-[1200px] mx-auto px-6 py-8 pb-20'>
-        <FlowSteps
-          eyebrow='How Enrollment Works'
-          title='Show families how to move from interest to signup'
-          description='Tutoring and enrichment now have a visible frontend enrollment path instead of just brochure content.'
-          accentColor='var(--dt-learn-green)'
-          primaryHref='/book?service=learn'
-          primaryLabel='Start Enrollment'
-          secondaryHref='#core-academic'
-          secondaryLabel='Browse Programs'
-          steps={[
-            {
-              title: 'Choose the program type',
-              description: 'Compare core academics, test prep, and enrichment to find the best fit.',
-            },
-            {
-              title: 'Select the package',
-              description: 'Open the booking flow to choose tutoring, prep bundles, or monthly enrichment plans.',
-            },
-            {
-              title: 'Send enrollment details',
-              description: 'Pick a time, add student details, and complete the frontend enrollment request.',
-            },
-          ]}
-        />
+        {isLoading ? (
+          <div className='flex items-center justify-center py-20'>
+             <div className='h-8 w-8 animate-spin rounded-full border-4 border-[var(--dt-learn-green)] border-t-transparent' />
+          </div>
+        ) : (
+          <>
+            <FlowSteps
+              eyebrow='How Enrollment Works'
+              title='Show families how to move from interest to signup'
+              description='Tutoring and enrichment now have a visible frontend enrollment path instead of just brochure content.'
+              accentColor='var(--dt-learn-green)'
+              primaryHref='/book?service=learn'
+              primaryLabel='Start Enrollment'
+              secondaryHref='#core-academic'
+              secondaryLabel='Browse Programs'
+              steps={[
+                {
+                  title: 'Choose the program type',
+                  description: 'Compare core academics, test prep, and enrichment to find the best fit.',
+                },
+                {
+                  title: 'Select the package',
+                  description: 'Open the booking flow to choose tutoring, prep bundles, or monthly enrichment plans.',
+                },
+                {
+                  title: 'Send enrollment details',
+                  description: 'Pick a time, add student details, and complete the frontend enrollment request.',
+                },
+              ]}
+            />
 
-        <div className='mb-12 grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4'>
-          {WHY_ITEMS.map(item => (
-            <WhyItemCard key={item.title} item={item} />
-          ))}
-        </div>
+            <div className='mb-12 grid grid-cols-1 gap-3.5 sm:grid-cols-2 lg:grid-cols-4'>
+              {WHY_ITEMS.map(item => (
+                <WhyItemCard key={item.title} item={item} />
+              ))}
+            </div>
 
-        <div className='mb-10 grid grid-cols-1 gap-4 md:grid-cols-3'>
-          {TIERS.map(tier => (
-            <TierCard key={tier.name} tier={tier} />
-          ))}
-        </div>
+            <div className='mb-10 grid grid-cols-1 gap-4 md:grid-cols-3'>
+              {TIERS.map(tier => (
+                <TierCard key={tier.name} tier={tier} />
+              ))}
+            </div>
 
-        <div className='dt-section-divider' />
+            <div className='dt-section-divider' />
 
-        <Section id='core-academic'>
-          <CoreAcademicSection />
-        </Section>
+            <Section id='core-academic'>
+              <CoreAcademicSection />
+            </Section>
 
-        <div className='dt-section-divider' />
+            <div className='dt-section-divider' />
 
-        <Section id='test-prep'>
-          <TestPrepSection />
-        </Section>
+            <Section id='test-prep'>
+              <TestPrepSection />
+            </Section>
 
-        <div className='dt-section-divider' />
+            <div className='dt-section-divider' />
 
-        <Section id='enrichment'>
-          <EnrichmentSection />
-        </Section>
+            <Section id='enrichment'>
+              <EnrichmentSection />
+            </Section>
 
-        <CtaStrip
-          title="Ready to unlock your child's potential?"
-          subtitle='Browse programs, pick a tier, and enroll today.'
-          primaryHref='/book?service=learn'
-          primaryLabel='Enroll Now'
-          primaryColor='var(--dt-learn-green)'
-        />
+            <CtaStrip
+              title="Ready to unlock your child's potential?"
+              subtitle='Browse programs, pick a tier, and enroll today.'
+              primaryHref='/book?service=learn'
+              primaryLabel='Enroll Now'
+              primaryColor='var(--dt-learn-green)'
+            />
+          </>
+        )}
       </div>
     </div>
   )

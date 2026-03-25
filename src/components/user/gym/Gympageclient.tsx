@@ -1,7 +1,8 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-
+import { useEffect, useState, useMemo } from 'react'
+import { useQuery } from '@tanstack/react-query'
+import { getClasses } from '@/api/bookingApi'
 import AgeGroupPanel from './AgeGroupPanel'
 import AgeGroupTabs from './AgeGroupTabs'
 import AllClassesSection from './AllClassesSection'
@@ -16,13 +17,42 @@ import SectionNav from '@/components/shared/SectionNav'
 import CtaStrip from '@/components/shared/CtaStrip'
 import { AGE_GROUPS, NAV_SECTIONS, SCHEDULE_DAYS, SPECIAL_PROGRAMS } from './constants'
 import type { GymSection } from './types'
-import { useMemo } from 'react'
 
 export default function GymPageClient() {
   const [active, setActive] = useState<GymSection>('age-groups')
   const [activeAge, setActiveAge] = useState<string>('babies')
 
-  const selectedGroup = useMemo(() => AGE_GROUPS.find(g => g.id === activeAge) ?? AGE_GROUPS[0], [activeAge])
+  const { data: allApiClasses = [], isLoading } = useQuery({
+    queryKey: ['booking', 'classes', 'gym'],
+    queryFn: getClasses,
+  })
+
+  // Map API classes to the old UI structure for compatibility
+  const selectedGroup = useMemo(() => {
+    const group = AGE_GROUPS.find(g => g.id === activeAge) ?? AGE_GROUPS[0]
+    
+    // Filter API classes that match this age group (fallback to constant if API empty)
+    const apiClassesForGroup = allApiClasses.filter(c => {
+       if (activeAge === 'babies') return c.ageMin <= 1.5
+       if (activeAge === 'toddlers') return c.ageMin >= 1.5 && c.ageMax <= 3
+       if (activeAge === 'preschool') return c.ageMin >= 3 && c.ageMax <= 5
+       if (activeAge === 'grade-school') return c.ageMin >= 6 && c.ageMax <= 12
+       if (activeAge === 'teens') return c.ageMin >= 13 && c.ageMax <= 17
+       if (activeAge === 'adults') return c.ageMin >= 18
+       if (activeAge === 'seniors') return c.ageMin >= 65
+       return false
+    }).map(c => ({
+       name: c.title,
+       ages: `${c.ageMin} – ${c.ageMax} years`,
+       img: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=700&q=80',
+       desc: c.description
+    }))
+
+    return {
+      ...group,
+      classes: apiClassesForGroup.length > 0 ? apiClassesForGroup : group.classes
+    }
+  }, [activeAge, allApiClasses])
 
   function scrollTo(id: GymSection) {
     setActive(id)
@@ -43,7 +73,6 @@ export default function GymPageClient() {
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
-
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
@@ -76,82 +105,90 @@ export default function GymPageClient() {
       <SectionNav items={NAV_SECTIONS} active={active} onNav={scrollTo} />
 
       <div className='max-w-[1200px] mx-auto px-6 py-8 pb-20'>
-        <FlowSteps
-          eyebrow='How Gym Booking Works'
-          title='Pick the class path before you book'
-          description='The gym page now explains the booking journey clearly so parents know how to go from age group and schedule to a reserved spot.'
-          accentColor='var(--dt-teal)'
-          primaryHref='/book?service=gym'
-          primaryLabel='Book a Gym Class'
-          secondaryHref='#schedule'
-          secondaryLabel='See Schedule'
-          steps={[
-            {
-              title: 'Match the age group',
-              description:
-                'Use the age tabs and class lists to find the right program for each child or family member.',
-            },
-            {
-              title: 'Choose the package',
-              description: 'Open the booking flow to select single class, packs, or monthly memberships.',
-            },
-            {
-              title: 'Reserve the session',
-              description: 'Pick the date, time, guests, and submit the booking request from the shared frontend flow.',
-            },
-          ]}
-        />
-
-        <Section id='age-groups'>
-          <SectionHeader
-            eyebrow='Age Groups'
-            title='Find Your Class'
-            desc='Every class is designed specifically for its age group — developmentally appropriate, engaging, and run by trained instructors who know how to make fitness fun.'
-          />
-          <AgeGroupTabs groups={AGE_GROUPS} activeId={activeAge} onSelect={setActiveAge} />
-          <AgeGroupPanel group={selectedGroup} />
-        </Section>
-
-        <Section id='classes'>
-          <SectionHeader
-            eyebrow='All Classes'
-            title='Browse Every Offering'
-            desc='A full look at every class across all age groups, organized by category.'
-          />
-          <AllClassesSection groups={AGE_GROUPS} />
-        </Section>
-
-        <Section id='schedule'>
-          <SectionHeader
-            eyebrow='Class Schedule'
-            title='Built Around Your Life'
-            desc='Our schedule is built around lifestyle anchors — school hours, nap times, and work shifts — so the whole family can participate without the logistics headache.'
-          />
-          <ScheduleSection days={SCHEDULE_DAYS} />
-        </Section>
-
-        <Section id='special'>
-          <SectionHeader
-            eyebrow='Special Programs'
-            title='For Every Body &amp; Every Need'
-            desc='Specialized programs designed for unique groups — because fitness should be accessible to everyone, at every stage of life.'
-          />
-
-          <div className='grid grid-cols-3 gap-4 mb-8 max-lg:grid-cols-2 max-md:grid-cols-1'>
-            {SPECIAL_PROGRAMS.map(program => (
-              <SpecialProgramCard key={program.name} program={program} />
-            ))}
+        {isLoading ? (
+          <div className='flex items-center justify-center py-20'>
+             <div className='h-8 w-8 animate-spin rounded-full border-4 border-[var(--dt-teal)] border-t-transparent' />
           </div>
+        ) : (
+          <>
+            <FlowSteps
+              eyebrow='How Gym Booking Works'
+              title='Pick the class path before you book'
+              description='The gym page now explains the booking journey clearly so parents know how to go from age group and schedule to a reserved spot.'
+              accentColor='var(--dt-teal)'
+              primaryHref='/book?service=gym'
+              primaryLabel='Book a Gym Class'
+              secondaryHref='#schedule'
+              secondaryLabel='See Schedule'
+              steps={[
+                {
+                  title: 'Match the age group',
+                  description:
+                    'Use the age tabs and class lists to find the right program for each child or family member.',
+                },
+                {
+                  title: 'Choose the package',
+                  description: 'Open the booking flow to select single class, packs, or monthly memberships.',
+                },
+                {
+                  title: 'Reserve the session',
+                  description: 'Pick the date, time, guests, and submit the booking request from the shared frontend flow.',
+                },
+              ]}
+            />
 
-          <CtaStrip
-            title='Ready to get moving?'
-            subtitle='Browse class availability, sign up, and reserve your spot today.'
-            primaryHref='/book?service=gym'
-            primaryLabel='Book a Class'
-            secondaryHref='#schedule'
-            secondaryLabel='View Class Schedule'
-          />
-        </Section>
+            <Section id='age-groups'>
+              <SectionHeader
+                eyebrow='Age Groups'
+                title='Find Your Class'
+                desc='Every class is designed specifically for its age group — developmentally appropriate, engaging, and run by trained instructors who know how to make fitness fun.'
+              />
+              <AgeGroupTabs groups={AGE_GROUPS} activeId={activeAge} onSelect={setActiveAge} />
+              <AgeGroupPanel group={selectedGroup} />
+            </Section>
+
+            <Section id='classes'>
+              <SectionHeader
+                eyebrow='All Classes'
+                title='Browse Every Offering'
+                desc='A full look at every class across all age groups, organized by category.'
+              />
+              <AllClassesSection groups={AGE_GROUPS} />
+            </Section>
+
+            <Section id='schedule'>
+              <SectionHeader
+                eyebrow='Class Schedule'
+                title='Built Around Your Life'
+                desc='Our schedule is built around lifestyle anchors — school hours, nap times, and work shifts — so the whole family can participate without the logistics headache.'
+              />
+              <ScheduleSection days={SCHEDULE_DAYS} />
+            </Section>
+
+            <Section id='special'>
+              <SectionHeader
+                eyebrow='Special Programs'
+                title='For Every Body &amp; Every Need'
+                desc='Specialized programs designed for unique groups — because fitness should be accessible to everyone, at every stage of life.'
+              />
+
+              <div className='grid grid-cols-3 gap-4 mb-8 max-lg:grid-cols-2 max-md:grid-cols-1'>
+                {SPECIAL_PROGRAMS.map(program => (
+                  <SpecialProgramCard key={program.name} program={program} />
+                ))}
+              </div>
+
+              <CtaStrip
+                title='Ready to get moving?'
+                subtitle='Browse class availability, sign up, and reserve your spot today.'
+                primaryHref='/book?service=gym'
+                primaryLabel='Book a Class'
+                secondaryHref='#schedule'
+                secondaryLabel='View Class Schedule'
+              />
+            </Section>
+          </>
+        )}
       </div>
     </div>
   )

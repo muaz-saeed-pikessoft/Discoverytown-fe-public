@@ -1,10 +1,10 @@
 'use client'
 
-import type { FulfillmentMode, FlowState } from './types'
+import type { FlowState, FulfillmentMode } from './types'
 
 import Link from 'next/link'
-import { useMemo, useState } from 'react'
 import { useSearchParams } from 'next/navigation'
+import { useMemo, useState } from 'react'
 
 import { COMMERCE_CATEGORY_META, getCommerceItems, type CommerceCategory } from './commerceData'
 

@@ -5,7 +5,7 @@
 
 const ENV = {
   /** Base URL for the backend API */
-  API_BASE_URL: process.env.NEXT_PUBLIC_URL ?? '',
+  API_BASE_URL: process.env.NEXT_PUBLIC_API_URL ?? '',
 
   /** Base URL for image assets */
   IMAGE_URL: process.env.NEXT_PUBLIC_IMAGE_URL ?? '',
@@ -24,6 +24,9 @@ const ENV = {
 
   /** Whether we are in development */
   IS_DEVELOPMENT: process.env.NODE_ENV === 'development',
+
+  /** Whether MSW mock API is enabled */
+  ENABLE_MOCKS: process.env.NEXT_PUBLIC_ENABLE_MOCKS === 'true',
 } as const
 
 export default ENV

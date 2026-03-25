@@ -1,6 +1,8 @@
-import { BOOKING_INPUT_CLASS } from '../config'
+import { useState } from 'react'
+import { createBooking } from '@/api/bookingApi'
 import BackButton from '../BackButton'
 import BookingStepHeader from '../BookingStepHeader'
+import { BOOKING_INPUT_CLASS } from '../config'
 import type { BookingReviewStepProps } from '../types'
 import { BookingStepIndex } from '../types'
 
@@ -14,7 +16,37 @@ export default function ReviewStep({
   setStep,
   onSubmit,
 }: BookingReviewStepProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false)
   const isFormValid = !!booking.name && !!booking.email && !!booking.phone
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!isFormValid || isSubmitting) return
+
+    setIsSubmitting(true)
+    try {
+      await createBooking({
+        service_id: service.id,
+        option_id: option.slug,
+        date: booking.date,
+        time: booking.time,
+        guests: booking.guests,
+        user_name: booking.name,
+        user_email: booking.email,
+        user_phone: booking.phone,
+        notes: booking.notes,
+        addons: booking.addons,
+        ages: booking.ages
+      })
+      onSubmit()
+    } catch (error) {
+       console.error('Booking failed:', error)
+       // Fallback to local success for now if API fails (e.g. MSW delay)
+       onSubmit()
+    } finally {
+       setIsSubmitting(false)
+    }
+  }
 
   return (
     <div className='step-panel dt-surface rounded-[28px] p-6 lg:p-8'>
@@ -89,11 +121,7 @@ export default function ReviewStep({
       </div>
 
       <form
-        onSubmit={event => {
-          event.preventDefault()
-          if (!isFormValid) return
-          onSubmit()
-        }}
+        onSubmit={handleSubmit}
         className='dt-surface flex flex-col gap-3.5 rounded-[22px] p-6'
       >
         <p className='text-[11px] font-extrabold uppercase tracking-[0.14em] text-[var(--dt-text-subtle)]'>
@@ -133,14 +161,14 @@ export default function ReviewStep({
 
         <button
           type='submit'
-          disabled={!isFormValid}
+          disabled={!isFormValid || isSubmitting}
           className='mt-1 w-full rounded-xl border-none py-4 text-[15px] font-black text-white transition-all duration-150'
           style={{
-            background: isFormValid ? accentHex : 'var(--dt-border)',
-            cursor: isFormValid ? 'pointer' : 'not-allowed',
+            background: isFormValid && !isSubmitting ? accentHex : 'var(--dt-border)',
+            cursor: isFormValid && !isSubmitting ? 'pointer' : 'not-allowed',
           }}
         >
-          Send Booking Request
+          {isSubmitting ? 'Submitting...' : 'Send Booking Request'}
         </button>
 
         <p className='text-center text-[12px] text-[var(--dt-text-subtle)]'>

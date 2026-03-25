@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux'
 import { toast } from 'react-toastify'
 
 import { login } from '@/store/slices/authSlice'
+import { registerUser } from '@/api/authApi'
 import type { RegisterFormValues } from '@/types/form-types'
 
 const schema = yup.object({
@@ -38,10 +39,20 @@ export default function RegisterPage() {
   })
 
   const onSubmit = async (data: RegisterFormValues) => {
-    await new Promise<void>(resolve => setTimeout(resolve, 800))
-    dispatch(login({ email: data.email, name: `${data.firstName} ${data.lastName}` }))
-    toast.success('Account created! Welcome to Discovery Town!')
-    router.push('/my-account')
+    try {
+      const response = await registerUser(data)
+      
+      dispatch(login({ 
+        user: response.user,
+        token: response.accessToken,
+        refreshToken: response.refreshToken
+      }))
+      
+      toast.success('Account created! Welcome to Discovery Town!')
+      router.push('/my-account')
+    } catch (error: any) {
+      toast.error(error.response?.data?.message || 'Registration failed. Please try again.')
+    }
   }
 
   const inputClass =

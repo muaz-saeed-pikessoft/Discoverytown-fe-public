@@ -1,15 +1,53 @@
 /**
  * Commerce API service.
- * Handles shop, gift, and rental operations.
  *
- * Currently returns mock data.
- * When backend is ready: replace mock returns with apiClient calls.
+ * Handles shop, gift, and rental operations via Axios.
+ * MSW intercepts these calls in development; real backend handles them in production.
+ *
+ * API-READY: Only endpoint URLs need to change for production.
  */
 
-import type { CommerceItem, CommerceCategory } from '@/modules/commerce/components/commerceData'
-import { getCommerceItems as getMockItems } from '@/modules/commerce/components/commerceData'
+import type { CommerceCategory, CommerceItem } from '@/modules/commerce/components/commerceData'
+import {
+  adaptCommerceItems,
+  adaptOrderConfirmation,
+} from '@/data/adapters/commerceAdapter'
+import type {
+  RawCommerceItemResponse,
+  RawOrderConfirmationResponse,
+  OrderConfirmation,
+} from '@/data/adapters/commerceAdapter'
 
-// import apiClient from './client'
+import apiClient from './client'
+
+export type StorefrontCommerceCategory = 'cafe' | 'gifts' | 'rentals' | 'shop'
+
+export interface StorefrontCommerceItem {
+  id: string
+  name: string
+  description: string
+  price: number
+  image: string
+  tags: string[]
+  popular?: boolean
+  category: StorefrontCommerceCategory
+}
+
+/**
+ * Fetch storefront commerce items (UI-facing catalog).
+ *
+ * Note: This is intentionally separate from the "API-ready" commerce
+ * endpoints (`/api/commerce/...`) which mirror the backend contract.
+ */
+export async function getCommerceItems(
+  category: StorefrontCommerceCategory,
+): Promise<StorefrontCommerceItem[]> {
+  const { data } = await apiClient.get<StorefrontCommerceItem[]>(
+    `/api/storefront/commerce/${category}/items`,
+  )
+
+  return data
+}
 
 /** Commerce order submission payload */
 export interface SubmitOrderPayload {
@@ -26,35 +64,43 @@ export interface SubmitOrderPayload {
   phone: string
 }
 
-/** Commerce order response */
-export interface OrderConfirmation {
-  orderId: string
-  status: 'received' | 'confirmed' | 'processing'
-}
-
 /**
  * Fetch commerce items by category.
- *
- * API-READY: Replace mock with:
- *   const { data } = await apiClient.get<CommerceItem[]>(`/commerce/${category}/items`)
- *   return data
+ * API-READY: Only endpoint URL needs to change for production.
  */
-export async function getCommerceItemsByCategory(category: CommerceCategory): Promise<CommerceItem[]> {
-  return getMockItems(category)
+export async function getCommerceItemsByCategory(
+  category: CommerceCategory,
+): Promise<CommerceItem[]> {
+  const { data } = await apiClient.get<RawCommerceItemResponse[]>(
+    `/api/commerce/${category}/items`,
+  )
+
+  return adaptCommerceItems(data)
 }
 
 /**
  * Submit a commerce order.
- *
- * API-READY: Replace mock with:
- *   const { data } = await apiClient.post<OrderConfirmation>('/commerce/orders', payload)
- *   return data
+ * API-READY: Only endpoint URL needs to change for production.
  */
-export async function submitOrder(payload: SubmitOrderPayload): Promise<OrderConfirmation> {
-  void payload
+export async function submitOrder(
+  payload: SubmitOrderPayload,
+): Promise<OrderConfirmation> {
+  const { data } = await apiClient.post<RawOrderConfirmationResponse>(
+    '/api/commerce/orders',
+    {
+      item_slug: payload.itemSlug,
+      category: payload.category,
+      quantity: payload.quantity,
+      fulfillment: payload.fulfillment,
+      date: payload.date,
+      time: payload.time,
+      address: payload.address,
+      notes: payload.notes,
+      name: payload.name,
+      email: payload.email,
+      phone: payload.phone,
+    },
+  )
 
-  return {
-    orderId: `ORD-${Date.now()}`,
-    status: 'received',
-  }
+  return adaptOrderConfirmation(data)
 }

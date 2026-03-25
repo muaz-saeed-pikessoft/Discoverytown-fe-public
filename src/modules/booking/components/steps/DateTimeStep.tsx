@@ -1,3 +1,7 @@
+'use client'
+
+import { useQuery } from '@tanstack/react-query'
+import { getTimeSlots } from '@/api/bookingApi'
 import BackButton from '../BackButton'
 import BookingStepHeader from '../BookingStepHeader'
 import MiniCalendar from '../MiniCalendar'
@@ -14,6 +18,16 @@ export default function DateTimeStep({
   update,
   setStep,
 }: BookingDateTimeStepProps) {
+  // Fetch slots for selected date range
+  const { data: slots = [], isLoading } = useQuery({
+    queryKey: ['booking', 'slots', booking.date],
+    queryFn: () => getTimeSlots(booking.date || undefined),
+    enabled: !!booking.date,
+  })
+
+  // Normalize static times with API times if available
+  const availableTimes = slots.length > 0 ? slots.map(s => s.startTime) : service.times
+
   return (
     <div className='step-panel dt-surface rounded-[28px] p-6 lg:p-8'>
       <BackButton onClick={() => setStep(BookingStepIndex.Package)} />
@@ -60,25 +74,36 @@ export default function DateTimeStep({
             Select Time
           </p>
           <div className='grid grid-cols-2 gap-2'>
-            {service.times.map(time => {
-              const selected = booking.time === time
+            {isLoading ? (
+              <>
+                <div className='h-12 animate-pulse rounded-[12px] bg-black/5' />
+                <div className='h-12 animate-pulse rounded-[12px] bg-black/5' />
+              </>
+            ) : booking.date ? (
+              availableTimes.map(time => {
+                const selected = booking.time === time
 
-              return (
-                <button
-                  key={time}
-                  type='button'
-                  onClick={() => update({ time })}
-                  className='cursor-pointer rounded-[12px] border-[1.5px] py-3 text-center text-[13px] font-bold transition-all duration-150'
-                  style={{
-                    background: selected ? accentHex : 'white',
-                    borderColor: selected ? accentHex : 'var(--dt-border)',
-                    color: selected ? '#fff' : 'var(--dt-text-muted)',
-                  }}
-                >
-                  {time}
-                </button>
-              )
-            })}
+                return (
+                  <button
+                    key={time}
+                    type='button'
+                    onClick={() => update({ time })}
+                    className='cursor-pointer rounded-[12px] border-[1.5px] py-3 text-center text-[13px] font-bold transition-all duration-150'
+                    style={{
+                      background: selected ? accentHex : 'white',
+                      borderColor: selected ? accentHex : 'var(--dt-border)',
+                      color: selected ? '#fff' : 'var(--dt-text-muted)',
+                    }}
+                  >
+                    {time}
+                  </button>
+                )
+              })
+            ) : (
+              <p className='col-span-2 py-4 text-center text-[13px] text-[var(--dt-text-muted)]'>
+                Please select a date first
+              </p>
+            )}
           </div>
         </div>
       </div>
