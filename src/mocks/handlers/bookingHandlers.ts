@@ -7,13 +7,8 @@
 
 import { delay, http, HttpResponse } from 'msw'
 
-import {
-  MOCK_RAW_BOOKINGS,
-  MOCK_RAW_CLASSES,
-  MOCK_RAW_EVENTS,
-  MOCK_RAW_PARTY_PACKAGES,
-  MOCK_RAW_TIME_SLOTS,
-} from '@/mocks/data/mockApiData'
+import { MOCK_RAW_BOOKINGS, MOCK_RAW_CLASSES, MOCK_RAW_EVENTS, MOCK_RAW_TIME_SLOTS } from '@/mocks/data/mockApiData'
+import { MOCK_PARTY_PACKAGES_API_RESPONSE } from '@/mocks/data/partyPackagesEnvelope'
 import type { RawBookingResponse } from '@/data/adapters/bookingAdapter'
 
 const SIMULATED_DELAY_MS = 300
@@ -107,6 +102,6 @@ export const bookingHandlers = [
   http.get('/api/party-packages', async () => {
     await delay(SIMULATED_DELAY_MS)
 
-    return HttpResponse.json(MOCK_RAW_PARTY_PACKAGES)
+    return HttpResponse.json(MOCK_PARTY_PACKAGES_API_RESPONSE)
   }),
 ]

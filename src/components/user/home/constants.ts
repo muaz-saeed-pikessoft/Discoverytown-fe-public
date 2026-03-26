@@ -45,7 +45,7 @@ export const categoryCards: CategoryCard[] = [
 export const highlights: Highlight[] = [
   { value: '8+', label: 'Things to do' },
   { value: 'Daily', label: 'Open 7 days a week' },
-  { value: 'All ages', label: 'Kids 1–12 & parents' },
+  { value: 'All ages', label: 'Kids 0–10 & parents' },
 ]
 
 export const reasons: Reason[] = [

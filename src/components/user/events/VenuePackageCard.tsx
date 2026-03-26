@@ -7,7 +7,7 @@ import type { VenuePackageItem } from './types'
 
 export default function VenuePackageCard({ pkg }: VenuePackageCardProps) {
   const [hover, setHover] = useState(false)
-  const optionSlug = pkg.id === 'midnight' ? 'venue-buyout-standard' : 'venue-buyout-premium'
+  const optionSlug = `venue-buyout-${pkg.id}`
 
   return (
     <div

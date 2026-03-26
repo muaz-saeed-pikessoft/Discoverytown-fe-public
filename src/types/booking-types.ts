@@ -76,6 +76,10 @@ export type PartyAddOn = {
   pricingModel: 'flat' | 'per-person'
 }
 
+export type PartyPackageKind = 'private_room' | 'venue_buyout'
+
+export type PartyCardTheme = 'primary' | 'teal' | 'teal_dark' | 'navy' | 'dark'
+
 export type PartyPackage = {
   id: string
   name: string
@@ -89,6 +93,54 @@ export type PartyPackage = {
   addOns: PartyAddOn[]
   color: 'primary' | 'secondary' | 'accent'
   popular: boolean
+  kind: PartyPackageKind
+  imageUrl: string
+  priceMin: number
+  priceMax: number
+  adultsIncluded: number
+  staffSummary: string
+  depositNote: string
+  badgeLabel: string | null
+  cardTheme: PartyCardTheme
+}
+
+/** Events page sections returned with GET /api/party-packages (optional envelope). */
+export type EventsPageAddonItem = {
+  name: string
+  desc: string
+  price: string
+}
+
+export type EventsPageAddonGroup = {
+  title: string
+  anchor: string
+  items: EventsPageAddonItem[]
+  border: string
+  bg: string
+  priceBg: string
+  priceColor: string
+}
+
+export type EventsPageCategoryCard = {
+  name: string
+  desc: string
+  accent: 'primary' | 'teal' | 'dark' | 'amber'
+  anchor: string
+}
+
+export type EventsPageWeBringService = {
+  name: string
+  desc: string
+}
+
+export type EventsPageCatalog = {
+  addonCategoryCards: EventsPageCategoryCard[]
+  addonGroups: EventsPageAddonGroup[]
+  takeoutCategoryCards: EventsPageCategoryCard[]
+  takeoutGroups: EventsPageAddonGroup[]
+  weBringServices: EventsPageWeBringService[]
+  weBringImages: Record<string, string>
+  takeoutBannerImageUrl: string
 }
 
 export type GuestRecord = {

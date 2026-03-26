@@ -148,14 +148,18 @@ export default function PlayPageClient() {
                 title='Reserve the Space Just for You'
                 desc='Want the whole place to yourselves? Choose one of three private options for your group or event.'
               />
-              <PrivatePlayCards 
-                options={packages.map(pkg => ({
-                  slug: pkg.id,
-                  name: pkg.name,
-                  desc: pkg.tagline,
-                  accent: pkg.color === 'primary' ? 'primary' : 'primary',
-                  img: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=700&q=80'
-                }))} 
+              <PrivatePlayCards
+                options={packages
+                  .filter(pkg => pkg.kind === 'private_room')
+                  .map(pkg => ({
+                    slug: pkg.id,
+                    name: pkg.name,
+                    desc: pkg.tagline,
+                    accent: pkg.color === 'primary' ? 'primary' : 'primary',
+                    img:
+                      pkg.imageUrl ||
+                      'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=700&q=80',
+                  }))}
               />
             </Section>
 

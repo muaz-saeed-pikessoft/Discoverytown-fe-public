@@ -53,6 +53,7 @@ export const QUERY_KEYS = {
     BOOKING: (id: string) => ['user', 'bookings', id] as const,
     BOOKINGS: (filters?: object) => ['user', 'bookings', filters] as const,
     ACCOUNT: ['user', 'account'] as const,
+    EVENTS_PARTY_PAGE: ['user', 'events', 'party-page'] as const,
   },
 } as const
 

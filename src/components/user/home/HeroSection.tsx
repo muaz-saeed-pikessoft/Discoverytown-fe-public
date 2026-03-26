@@ -15,13 +15,17 @@ export default function HeroSection() {
             <h1 className='dt-font-heading text-[clamp(2.6rem,5.2vw,4.8rem)] font-black leading-[0.94] text-white'>
               Play,&nbsp;eat,
               <br />
-              learn,&nbsp;and
+              learn,&nbsp;train
               <br />
-              <em className='not-italic text-[#f5a855]'>celebrate</em>&nbsp;here.
+              and&nbsp;<em className='not-italic text-[#f5a855]'>celebrate.</em>
+              <br />
+              <span className="text-[clamp(1.8rem,3.5vw,3rem)]">
+                here,&nbsp;or&nbsp;at&nbsp;your&nbsp;place
+              </span>
             </h1>
 
             <p className='mt-5 text-[15px] leading-[1.85] text-white/70 max-w-[400px] sm:text-[16px]'>
-              Discovery Town is the favourite family destination — indoor play, a real cafe, enrichment classes, and
+              Discovery Town is the favorite family destination — indoor play, a real cafe, enrichment classes, and
               unforgettable birthday parties all under one roof.
             </p>
 

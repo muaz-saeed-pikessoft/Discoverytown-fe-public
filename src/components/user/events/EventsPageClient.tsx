@@ -11,65 +11,42 @@ import SectionNav from '@/components/shared/SectionNav'
 import SubLabel from '@/components/shared/SubLabel'
 import AddonCategoryCards from './AddonCategoryCards'
 import AddonGroupsSection from './AddonGroupsSection'
-import {
-  ADDON_CATEGORY_CARDS,
-  ADDON_GROUPS,
-  NAV_SECTIONS,
-  TAKEOUT_CATEGORY_CARDS,
-  TAKEOUT_GROUPS,
-  TAKEOUT_IMAGE,
-  WE_BRING_IMAGES,
-  WE_BRING_SERVICES,
-} from './constants'
+import { NAV_SECTIONS, ADDON_CATEGORY_CARDS, ADDON_GROUPS, TAKEOUT_CATEGORY_CARDS, TAKEOUT_GROUPS, TAKEOUT_IMAGE, WE_BRING_IMAGES, WE_BRING_SERVICES } from './constants'
 import CtaStrip from './CtaStrip'
 import PrivatePackageCard from './PrivatePackageCard'
 import type { EventSection, PrivatePackageItem, VenuePackageItem } from './types'
 import VenuePackageCard from './VenuePackageCard'
 import WeBringServicesGrid from './WeBringServicesGrid'
-import { getPartyPackages } from '@/api/bookingApi'
+import { getEventsPartyPageData } from '@/api/bookingApi'
+import { QUERY_KEYS } from '@/constants/query-keys'
+import { mapPartyPackageToPrivateItem, mapPartyPackageToVenueItem } from './partyPackageMappers'
 
 export default function EventsPageClient() {
   const [active, setActive] = useState<EventSection>('packages')
 
-  const { data: packages = [], isLoading } = useQuery({
-    queryKey: ['events', 'packages'],
-    queryFn: getPartyPackages,
+  const { data, isLoading } = useQuery({
+    queryKey: QUERY_KEYS.USER.EVENTS_PARTY_PAGE,
+    queryFn: getEventsPartyPageData,
   })
 
-  // Map API data to UI types
+  const packages = data?.packages ?? []
+  const catalog = data?.catalog
+
   const privatePackages: PrivatePackageItem[] = packages
-    .filter(p => p.color !== 'secondary')
-    .map(p => ({
-      id: p.id,
-      name: p.name,
-      img: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=700&q=80',
-      price: `$${p.price}`,
-      priceNote: null,
-      accent: p.color === 'primary' ? 'var(--dt-primary)' : 'var(--dt-teal)',
-      bg: p.color === 'primary' ? 'var(--dt-primary-light)' : 'var(--dt-teal-light)',
-      border: 'var(--dt-border)',
-      badge: p.popular ? 'Popular' : null,
-      children: p.guestsIncluded,
-      adults: p.guestsIncluded,
-      duration: `${p.duration / 60} hours`,
-      extraChild: `$${p.pricePerExtraGuest}/child`,
-      inclusions: p.features.map(f => ({ text: f }))
-    }))
+    .filter(p => p.kind === 'private_room')
+    .map(mapPartyPackageToPrivateItem)
 
   const venuePackages: VenuePackageItem[] = packages
-    .filter(p => p.color === 'secondary')
-    .map(p => ({
-      id: p.id,
-      name: p.name,
-      price: `$${p.price}`,
-      deposit: `$${p.depositAmount} deposit`,
-      accent: 'var(--dt-navy)',
-      guests: p.guestsIncluded,
-      duration: `${p.duration / 60} hours`,
-      staff: 'Full Team',
-      inclusions: p.features.map(f => ({ text: f })),
-      badge: p.popular ? 'Most Value' : undefined
-    }))
+    .filter(p => p.kind === 'venue_buyout')
+    .map(mapPartyPackageToVenueItem)
+
+  const addonCategoryCards = catalog?.addonCategoryCards ?? ADDON_CATEGORY_CARDS
+  const addonGroups = catalog?.addonGroups ?? ADDON_GROUPS
+  const takeoutCategoryCards = catalog?.takeoutCategoryCards ?? TAKEOUT_CATEGORY_CARDS
+  const takeoutGroups = catalog?.takeoutGroups ?? TAKEOUT_GROUPS
+  const weBringServices = catalog?.weBringServices ?? WE_BRING_SERVICES
+  const weBringImages = catalog?.weBringImages ?? WE_BRING_IMAGES
+  const takeoutBannerImage = catalog?.takeoutBannerImageUrl ?? TAKEOUT_IMAGE
 
   function scrollTo(id: EventSection) {
     setActive(id)
@@ -218,7 +195,7 @@ export default function EventsPageClient() {
               {/* Split banner */}
               <div className='mb-8 grid grid-cols-[1fr_1.1fr] gap-0 rounded-[20px] border-[1.5px] border-[var(--dt-border)] overflow-hidden max-md:grid-cols-1'>
                 <div className='overflow-hidden h-[220px] max-md:h-[200px]'>
-                  <img src={TAKEOUT_IMAGE} alt='Take out party' className='h-full w-full object-cover' />
+                  <img src={takeoutBannerImage} alt='Take out party' className='h-full w-full object-cover' />
                 </div>
                 <div className='bg-[var(--dt-dark)] px-8 py-9 flex flex-col justify-center'>
                   <p className='text-[11px] font-black tracking-[0.16em] uppercase text-[var(--dt-teal-dark)] mb-2.5'>
@@ -233,10 +210,10 @@ export default function EventsPageClient() {
               </div>
 
               {/* Takeout category jump cards */}
-              <AddonCategoryCards items={TAKEOUT_CATEGORY_CARDS} />
+              <AddonCategoryCards items={takeoutCategoryCards} />
 
               {/* Takeout groups — each has its own id */}
-              <AddonGroupsSection groups={TAKEOUT_GROUPS} />
+              <AddonGroupsSection groups={takeoutGroups} />
 
               <CtaStrip
                 title='Ready to order your Take Out Party?'
@@ -255,7 +232,7 @@ export default function EventsPageClient() {
               />
 
               <div className='mb-7'>
-                <WeBringServicesGrid services={WE_BRING_SERVICES} images={WE_BRING_IMAGES} />
+                <WeBringServicesGrid services={weBringServices} images={weBringImages} />
               </div>
 
               {/* Pricing note — matches Play page dark card style */}

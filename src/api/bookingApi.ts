@@ -14,17 +14,20 @@ import {
   adaptClasses,
   adaptEvents,
   adaptPartyPackages,
+  adaptEventsPageCatalog,
+  parsePartyPackagesPayload,
 } from '@/data/adapters/bookingAdapter'
 import type {
   RawBookingResponse,
   RawTimeSlotResponse,
   RawClassEventResponse,
   RawSpecialEventResponse,
-  RawPartyPackageResponse,
+  RawPartyPackagesApiPayload,
 } from '@/data/adapters/bookingAdapter'
 import type {
   BookingRecord,
   ClassEvent,
+  EventsPageCatalog,
   PartyPackage,
   SpecialEvent,
   TimeSlot,
@@ -114,11 +117,25 @@ export async function getEvents(): Promise<SpecialEvent[]> {
  * API-READY: Only endpoint URL needs to change for production.
  */
 export async function getPartyPackages(): Promise<PartyPackage[]> {
-  const { data } = await apiClient.get<RawPartyPackageResponse[]>(
-    '/api/party-packages',
-  )
+  const { data } = await apiClient.get<RawPartyPackagesApiPayload>('/api/party-packages')
+  const { packages } = parsePartyPackagesPayload(data)
+  return adaptPartyPackages(packages)
+}
 
-  return adaptPartyPackages(data)
+/**
+ * Party packages plus optional Events page catalog (add-ons, takeout, we-bring).
+ * Backend may return `{ packages, events_page }` or a legacy array.
+ */
+export async function getEventsPartyPageData(): Promise<{
+  packages: PartyPackage[]
+  catalog: EventsPageCatalog | null
+}> {
+  const { data } = await apiClient.get<RawPartyPackagesApiPayload>('/api/party-packages')
+  const { packages, eventsPageRaw } = parsePartyPackagesPayload(data)
+  return {
+    packages: adaptPartyPackages(packages),
+    catalog: eventsPageRaw ? adaptEventsPageCatalog(eventsPageRaw) : null,
+  }
 }
 /**
  * Submit a new booking request.
