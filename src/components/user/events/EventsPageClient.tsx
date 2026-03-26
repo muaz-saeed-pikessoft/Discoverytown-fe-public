@@ -226,7 +226,7 @@ export default function EventsPageClient() {
             {/* ── WE BRING THE PARTY ───────────────────────────────────────────── */}
             <Section id='we-bring-party'>
               <SectionHeader
-                eyebrow='We Bring The Party To You'
+                eyebrow='Party at your place'
                 title='We Come to Your Venue'
                 desc="Can't come to us? We'll bring the entire DiscoveryTown experience to your backyard, park, school, or event space. From inflatables and entertainers to full catering and setup."
               />

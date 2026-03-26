@@ -1,6 +1,7 @@
 import type { SuccessScreenProps } from './types'
 
 export default function SuccessScreen({ booking, svcLabel, optLabel, accentHex, onReset }: SuccessScreenProps) {
+  const isPartyBooking = booking.service === 'events'
   return (
     <div className='dt-font-body flex min-h-screen items-center justify-center bg-[var(--dt-bg-page)] px-5'>
       <div className='w-full max-w-[520px] rounded-[28px] bg-white p-10 text-center shadow-[0_20px_60px_rgba(0,0,0,0.1)]'>
@@ -18,6 +19,16 @@ export default function SuccessScreen({ booking, svcLabel, optLabel, accentHex, 
           </strong>{' '}
           on <strong>{booking.date}</strong> at <strong>{booking.time}</strong> has been received. We&apos;ll contact{' '}
           <strong>{booking.email}</strong> within 1 business day to confirm.
+        </p>
+        <p className='mb-6 text-[14px] leading-[1.7] text-[var(--dt-text-muted)]'>
+          Next, watch for waiver instructions — signing before you arrive keeps check-in fast.
+          {isPartyBooking ? (
+            <>
+              {' '}
+              For parties, you can forward the guest waiver link from your confirmation so other parents can sign ahead
+              of time.
+            </>
+          ) : null}
         </p>
         <button
           type='button'

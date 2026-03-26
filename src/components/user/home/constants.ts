@@ -4,7 +4,7 @@ export const categoryCards: CategoryCard[] = [
   {
     title: 'Play',
     description:
-      'Drop-in sessions, private playtime, themed camps, and parents night out — designed for kids 1–12 to explore, climb, and create.',
+      'Drop-in sessions, private playtime, themed camps, and parents night out — designed for kids 0–10 to explore, climb, and create.',
     href: '/play',
     actionHref: '/book',
     actionLabel: 'Book Play',
@@ -14,7 +14,7 @@ export const categoryCards: CategoryCard[] = [
   {
     title: 'Cafe & Food',
     description:
-      'Fresh meals, specialty drinks, and family favorites made in-house. Order at the counter, or get deliverys',
+      'Fresh meals, specialty drinks, and family favorites made in-house. Order at the counter, or arrange delivery.',
     href: '/cafeAndfood',
     actionHref: '/cafeAndfood',
     actionLabel: 'See Menu',
@@ -31,13 +31,33 @@ export const categoryCards: CategoryCard[] = [
     accentHex: '#0ea5a0',
   },
   {
-    title: 'Learn & Gym',
+    title: 'Learn',
     description:
-      'Weekly classes and tutoring sessions. Build skills and stay active without leaving the family destination.',
+      'Tutoring, test prep, and enrichment programs — build skills in one welcoming family destination.',
     href: '/learn',
     actionHref: '/book?service=learn',
     actionLabel: 'Programs',
+    image: '/book/learnPrograms.jpeg',
+    accentHex: '#0ea5a0',
+  },
+  {
+    title: 'Gym',
+    description:
+      'Weekly fitness classes for kids and adults — stay active before or after play and cafe time.',
+    href: '/gym',
+    actionHref: '/book?service=gym',
+    actionLabel: 'Classes',
     image: '/home/gym.jpeg',
+    accentHex: '#0ea5a0',
+  },
+  {
+    title: 'Holiday events',
+    description:
+      'Seasonal celebrations, character visits, and themed family nights — check what is on for the holidays.',
+    href: '/play#holiday-events',
+    actionHref: '/book',
+    actionLabel: 'Book visit',
+    image: '/home/event.jpeg',
     accentHex: '#0ea5a0',
   },
 ]
@@ -101,7 +121,7 @@ export const faqs: FAQ[] = [
   },
   {
     q: 'What age groups is Discovery Town for?',
-    a: 'Our play areas are designed for children aged 1–12. All cafe, event, and learning facilities are open to the whole family.',
+    a: 'Our play areas are designed for children aged 0–10. All cafe, event, and learning facilities are open to the whole family.',
   },
   {
     q: 'Can I host a private birthday party?',

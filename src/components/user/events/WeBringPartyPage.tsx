@@ -47,7 +47,7 @@ export default function WeBringPartyPage() {
   return (
     <div className='min-h-screen bg-[var(--dt-bg-page)] dt-font-body'>
       <Hero
-        eyebrow={<p className='dt-eyebrow text-[var(--dt-coral)] mb-2'>We Bring The Party To You</p>}
+        eyebrow={<p className='dt-eyebrow text-[var(--dt-coral)] mb-2'>Party at your place</p>}
         title='We Come to Your Venue'
         description="Can't come to us? We'll bring the DiscoveryTown experience to your backyard, park, school, or event space."
         bgUrl='https://images.unsplash.com/photo-1619301871534-b19f6efd2e6c?w=1400&q=80'
@@ -66,7 +66,7 @@ export default function WeBringPartyPage() {
       <div className='mx-auto max-w-[1200px] px-6 pb-20 pt-8'>
         <Section id='we-bring-party'>
           <SectionHeader
-            eyebrow='We Bring The Party To You'
+            eyebrow='Party at your place'
             title='The Full DiscoveryTown Experience, Anywhere'
             description='From inflatables and train rides to full catering, entertainment, and setup, we bring everything you need to make your off-site event spectacular.'
           />

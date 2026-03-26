@@ -11,6 +11,9 @@ import Link from 'next/link'
 import { useEffect, useMemo, useState } from 'react'
 import {
   BAKED_FOOD,
+  CAFE_DRINK_JUMP_LINKS,
+  CAFE_FOOD_JUMP_LINKS,
+  CAFE_FOOD_MENU_ANCHOR,
   COLD_DRINKS,
   DELIVERY_OPTIONS,
   FROZEN_TREATS,
@@ -34,6 +37,23 @@ import { BLUE, CORAL, MINT, SECTION_CLASS } from './pageConstants'
 import type { CartItem, MenuRow, OrderFormState } from './pageTypes'
 import TakeoutCard from './TakeoutCard'
 import type { CafeSection } from './types'
+
+function CafeMenuJumpRow({ links }: { links: { id: string; label: string }[] }) {
+  return (
+    <div className='mb-6 flex flex-wrap gap-2' role='navigation' aria-label='Jump to menu category'>
+      {links.map(link => (
+        <button
+          key={link.id}
+          type='button'
+          className='cursor-pointer rounded-full border border-[var(--dt-border)] bg-white px-4 py-2 text-[12px] font-extrabold text-[var(--dt-navy)] shadow-sm transition hover:border-[var(--dt-teal)] hover:text-[var(--dt-teal)]'
+          onClick={() => document.getElementById(link.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+        >
+          {link.label}
+        </button>
+      ))}
+    </div>
+  )
+}
 
 export default function CafeFoodPageClient() {
   const [activeSection, setActiveSection] = useState<CafeSection>('drinks')
@@ -102,6 +122,7 @@ export default function CafeFoodPageClient() {
         }))
 
       return {
+        anchorId: `cafe-${cat.key}`,
         title: cat.title,
         subtitle: cat.sub,
         accent: CORAL,
@@ -110,44 +131,85 @@ export default function CafeFoodPageClient() {
     })
   }, [products])
 
-  const foodCards = useMemo(() => {
+  const foodGroups = useMemo(() => {
     const accents = [CORAL, BLUE, MINT]
     const apiFood = products.filter(p => p.tags.includes('food'))
 
     if (apiFood.length > 0) {
-      return apiFood.map((p, index) => ({
-        id: p.id,
-        name: p.name,
-        detail: p.description,
-        price: p.price,
-        priceLabel: `$${p.price.toFixed(2)}`,
-        image: p.image,
-        accent: accents[index % accents.length],
-        badge: p.popular ? 'Bestseller' : undefined,
-      }))
+      const cards = apiFood.map((p, index) => {
+        const row: MenuRow = {
+          id: p.id,
+          name: p.name,
+          detail: p.description,
+          price: p.price,
+          priceLabel: `$${p.price.toFixed(2)}`,
+          category: 'food',
+          img: p.image,
+          badge: p.popular ? 'Bestseller' : undefined,
+        }
+
+        return {
+          row,
+          accent: accents[index % accents.length],
+          image: row.img ?? '',
+          badge: row.badge,
+        }
+      })
+
+      return [{ anchorId: CAFE_FOOD_MENU_ANCHOR, title: 'Food menu', cards }]
     }
 
-    const fallbackRows = [
-      ...normalizeRows(PIZZAS.map(p => ({ name: p.name, desc: p.desc, badge: p.badge })), 8.5, 'pizza'),
-      ...normalizeRows(SANDWICHES.flatMap(g => g.items.map(i => ({ name: i.name, desc: i.desc }))), 7.5, 'sandwich'),
-      ...normalizeRows(TOASTS, 5.75, 'toasts'),
-      ...normalizeRows(KIDS_CORNER, 4.95, 'kids'),
-      ...normalizeRows(SALADS, 6.95, 'salads'),
-      ...normalizeRows(SNACKS, 2.95, 'snacks'),
-      ...normalizeRows(PASTRIES, 3.25, 'bakery'),
-      ...normalizeRows(SWEETS, 2.95, 'sweets'),
-      ...normalizeRows(BAKED_FOOD, 4.25, 'baked'),
+    const rowGroups: { anchorId: string; title: string; rows: MenuRow[] }[] = [
+      {
+        anchorId: 'cafe-pizza',
+        title: 'Pizza & hot plates',
+        rows: normalizeRows(PIZZAS.map(p => ({ name: p.name, desc: p.desc, badge: p.badge })), 8.5, 'pizza'),
+      },
+      {
+        anchorId: 'cafe-sandwiches',
+        title: 'Sandwiches & toasts',
+        rows: [
+          ...normalizeRows(SANDWICHES.flatMap(g => g.items.map(i => ({ name: i.name, desc: i.desc }))), 7.5, 'sandwich'),
+          ...normalizeRows(TOASTS, 5.75, 'toasts'),
+        ],
+      },
+      {
+        anchorId: 'cafe-salads-snacks',
+        title: 'Salads & snacks',
+        rows: [...normalizeRows(SALADS, 6.95, 'salads'), ...normalizeRows(SNACKS, 2.95, 'snacks')],
+      },
+      {
+        anchorId: 'cafe-kids-bakery',
+        title: 'Kids, bakery & baked bites',
+        rows: [
+          ...normalizeRows(KIDS_CORNER, 4.95, 'kids'),
+          ...normalizeRows(PASTRIES, 3.25, 'bakery'),
+          ...normalizeRows(BAKED_FOOD, 4.25, 'baked'),
+        ],
+      },
+      {
+        anchorId: 'cafe-sweets',
+        title: 'Sweets',
+        rows: normalizeRows(SWEETS, 2.95, 'sweets'),
+      },
     ]
 
-    return fallbackRows.map((row, index) => ({
-      id: row.id,
-      name: row.name,
-      detail: row.detail,
-      price: row.price,
-      priceLabel: row.priceLabel,
-      image: row.img ?? '',
-      accent: accents[index % accents.length],
-      badge: row.badge,
+    let accentIndex = 0
+
+    return rowGroups.map(group => ({
+      anchorId: group.anchorId,
+      title: group.title,
+      cards: group.rows.map(row => {
+        const accent = accents[accentIndex % accents.length]
+        accentIndex += 1
+
+        return {
+          row,
+          image: row.img ?? '',
+          accent,
+          badge: row.badge,
+        }
+      }),
     }))
   }, [products])
 
@@ -282,11 +344,16 @@ export default function CafeFoodPageClient() {
                 title='Cafe Menu Board'
                 description='Tap Add on any item — your cart builds instantly. Adjust quantities when you proceed.'
               />
+              <CafeMenuJumpRow links={CAFE_DRINK_JUMP_LINKS} />
               <div className='grid grid-cols-1 gap-4'>
                 {drinkBoards.map(board => (
                   <MenuBoard
                     key={board.title}
-                    {...board}
+                    anchorId={board.anchorId}
+                    title={board.title}
+                    subtitle={board.subtitle}
+                    accent={board.accent}
+                    rows={board.rows}
                     cartQty={cartQtyMap}
                     onAdd={handleAddItem}
                     onRemove={row => handleQuantity(row.id, (cartQtyMap[row.id] ?? 0) - 1)}
@@ -301,24 +368,36 @@ export default function CafeFoodPageClient() {
                 title='All-Day Kitchen Favorites'
                 description='Premium card-style menu with image-first dishes, clean pricing, and quick add actions.'
               />
-              <div className='grid grid-cols-3 gap-4 max-lg:grid-cols-2 max-md:grid-cols-1'>
-                {foodCards.map(item => (
-                  <MenuCard
-                    key={item.id}
-                    item={{
-                      name: item.name,
-                      desc: item.detail || 'Chef-crafted and freshly prepared.',
-                      priceLabel: item.priceLabel,
-                      badge: item.badge,
-                      image: item.image,
-                    }}
-                    accent={item.accent}
-                    qty={cartQtyMap[item.id] ?? 0}
-                    onAdd={() => handleAddItem(item)}
-                    onRemove={() => handleQuantity(item.id, (cartQtyMap[item.id] ?? 0) - 1)}
-                  />
-                ))}
-              </div>
+              <CafeMenuJumpRow
+                links={
+                  foodGroups.length === 1
+                    ? [{ id: foodGroups[0].anchorId, label: 'Food menu' }]
+                    : CAFE_FOOD_JUMP_LINKS
+                }
+              />
+              {foodGroups.map(group => (
+                <div key={group.anchorId} id={group.anchorId} className='mb-10 scroll-mt-[120px] last:mb-0'>
+                  <h3 className='dt-font-heading mb-4 text-[17px] font-black text-[var(--dt-navy)]'>{group.title}</h3>
+                  <div className='grid grid-cols-3 gap-4 max-lg:grid-cols-2 max-md:grid-cols-1'>
+                    {group.cards.map(({ row, accent, image, badge }) => (
+                      <MenuCard
+                        key={row.id}
+                        item={{
+                          name: row.name,
+                          desc: row.detail || 'Chef-crafted and freshly prepared.',
+                          priceLabel: row.priceLabel,
+                          badge: badge ?? row.badge,
+                          image: image ?? row.img ?? '',
+                        }}
+                        accent={accent}
+                        qty={cartQtyMap[row.id] ?? 0}
+                        onAdd={() => handleAddItem(row)}
+                        onRemove={() => handleQuantity(row.id, (cartQtyMap[row.id] ?? 0) - 1)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
             </section>
 
             <section id='takeout' className={SECTION_CLASS}>
@@ -333,7 +412,7 @@ export default function CafeFoodPageClient() {
             <section id='delivery' className={SECTION_CLASS}>
               <SectionHeader
                 eyebrow='Delivery & Catering'
-                title='We Bring the Cafe to You'
+                title='We bring the cafe to you'
                 description='Office lunches, birthday tables, or school events — custom menus and easy booking.'
               />
 

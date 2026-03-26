@@ -7,6 +7,24 @@ export const NAV_SECTIONS: NavSectionItem[] = [
   { id: 'delivery', label: 'Delivery & Catering' },
 ]
 
+/** In-page anchors for the drinks boards (jump from the cafe menu). */
+export const CAFE_DRINK_JUMP_LINKS: { id: string; label: string }[] = [
+  { id: 'cafe-hot-drinks', label: 'Hot drinks' },
+  { id: 'cafe-cold-drinks', label: 'Cold drinks' },
+  { id: 'cafe-frozen', label: 'Frozen & smoothies' },
+]
+
+/** In-page anchors for grouped food sections (fallback menu). */
+export const CAFE_FOOD_JUMP_LINKS: { id: string; label: string }[] = [
+  { id: 'cafe-pizza', label: 'Pizza & mains' },
+  { id: 'cafe-sandwiches', label: 'Sandwiches & toasts' },
+  { id: 'cafe-salads-snacks', label: 'Salads & snacks' },
+  { id: 'cafe-kids-bakery', label: 'Kids & bakery' },
+  { id: 'cafe-sweets', label: 'Sweets' },
+]
+
+export const CAFE_FOOD_MENU_ANCHOR = 'cafe-food-menu'
+
 export const HERO_PILLS: PillItem[] = [
   { label: 'Drinks', bg: '#FFFBEB', text: '#D97706', border: '#FDE68A' },
   { label: 'Food', bg: 'var(--dt-coral-soft)', text: 'var(--dt-coral)', border: '#FFD0D0' },

@@ -380,6 +380,59 @@ export const MOCK_RAW_EVENTS: RawSpecialEventResponse[] = [
     registered_count: 127,
   },
   {
+    id: 'event-holiday-winter',
+    title: 'Winter Wonderland Family Night',
+    description:
+      'Holiday lights, cookie decorating, a visit from festive characters, and a snow-play corner for little ones. Dress in your coziest winter best and make memories before the big day.',
+    featured: true,
+    dates: [
+      {
+        date: '2026-12-13',
+        start_time: '5:00 PM',
+        end_time: '8:00 PM',
+        activities: [
+          'Holiday character meet & greet',
+          'Cookie decorating station',
+          'Snow sensory play',
+          'Festive crafts',
+          'Hot cocoa bar',
+        ],
+      },
+      {
+        date: '2026-12-20',
+        start_time: '5:00 PM',
+        end_time: '8:00 PM',
+        activities: [
+          'Storytime with a special guest',
+          'Ornament craft',
+          'Dance party',
+          'Photo backdrop',
+        ],
+      },
+    ],
+    location: 'Main Play Arena + Party Rooms',
+    image_slug: 'winter-wonderland',
+    pricing_tiers: [
+      {
+        id: 'tier-holiday-gen',
+        label: 'General',
+        price: 22,
+        perks: ['Event access', 'One craft ticket', 'Hot cocoa'],
+        spots_available: 200,
+      },
+      {
+        id: 'tier-holiday-vip',
+        label: 'VIP',
+        price: 42,
+        perks: ['Priority entry', 'Reserved craft time', 'Goodie bag', 'Photo print'],
+        spots_available: 40,
+      },
+    ],
+    tags: ['holiday', 'seasonal', 'family', 'all-ages'],
+    max_capacity: 240,
+    registered_count: 88,
+  },
+  {
     id: 'event-2',
     title: 'Superhero Training Camp',
     description:

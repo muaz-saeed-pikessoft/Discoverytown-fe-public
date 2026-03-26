@@ -46,29 +46,70 @@ export default function PlayPageClient() {
     queryFn: getPartyPackages,
   })
 
+  const playPageLoading = eventsLoading || classesLoading || packagesLoading
+
   function scrollTo(id: SectionId) {
     setActive(id)
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
   useEffect(() => {
-    const ids = NAV.map(n => n.id)
+    if (playPageLoading) return
 
-    const handleScroll = () => {
+    const ids = NAV.map(n => n.id) as SectionId[]
+
+    // Below fixed navbar + sticky section nav (~74px + bar).
+    const ACTIVATION_OFFSET_PX = 148
+
+    function updateActiveFromScroll() {
       let cur: SectionId = ids[0]
-      for (const id of ids) {
-        const el = document.getElementById(id)
+      let matched = false
+
+      for (let i = 0; i < ids.length; i++) {
+        const el = document.getElementById(ids[i])
         if (!el) continue
-        if (el.getBoundingClientRect().top - 140 <= 0) cur = id
+
+        const nextEl = i + 1 < ids.length ? document.getElementById(ids[i + 1]) : null
+        const top = el.getBoundingClientRect().top
+        const nextTop = nextEl ? nextEl.getBoundingClientRect().top : Number.POSITIVE_INFINITY
+
+        // Active = this section has started (top at/above line) and the next has not yet reached the line.
+        if (top <= ACTIVATION_OFFSET_PX && nextTop > ACTIVATION_OFFSET_PX) {
+          cur = ids[i]
+          matched = true
+          break
+        }
       }
+
+      if (!matched) {
+        const firstEl = document.getElementById(ids[0])
+        if (firstEl && firstEl.getBoundingClientRect().top > ACTIVATION_OFFSET_PX) {
+          cur = ids[0]
+        } else {
+          for (let j = ids.length - 1; j >= 0; j--) {
+            const el = document.getElementById(ids[j])
+            if (el) {
+              cur = ids[j]
+              break
+            }
+          }
+        }
+      }
+
       setActive(prev => (prev === cur ? prev : cur))
     }
 
-    window.addEventListener('scroll', handleScroll, { passive: true })
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
+    updateActiveFromScroll()
+    requestAnimationFrame(updateActiveFromScroll)
 
-  const isLoading = eventsLoading || classesLoading || packagesLoading
+    window.addEventListener('scroll', updateActiveFromScroll, { passive: true })
+    window.addEventListener('resize', updateActiveFromScroll, { passive: true })
+
+    return () => {
+      window.removeEventListener('scroll', updateActiveFromScroll)
+      window.removeEventListener('resize', updateActiveFromScroll)
+    }
+  }, [playPageLoading])
 
   return (
     <div className='dt-font-body bg-[var(--dt-bg-page)] min-h-screen'>
@@ -98,7 +139,7 @@ export default function PlayPageClient() {
       <SectionNav active={active} onNav={scrollTo} items={NAV} />
 
       <div className='max-w-[1200px] mx-auto px-6 py-8 pb-20'>
-        {isLoading ? (
+        {playPageLoading ? (
           <div className='flex items-center justify-center py-20'>
              <div className='h-8 w-8 animate-spin rounded-full border-4 border-[var(--dt-primary)] border-t-transparent' />
           </div>
@@ -196,8 +237,11 @@ export default function PlayPageClient() {
 
               <SubLabel text='Active Events' />
               <div className='grid grid-cols-3 gap-3.5 mb-2 max-md:grid-cols-1'>
-                {events.map(e => {
+                {events
+                  .filter(e => !e.tags.includes('holiday'))
+                  .map(e => {
                   const firstDate = e.dates[0]
+
                   return (
                     <FestivalCard 
                       key={e.id} 
@@ -210,6 +254,50 @@ export default function PlayPageClient() {
                     />
                   )
                 })}
+              </div>
+            </Section>
+
+            <Section id='holiday-events'>
+              <SectionHeader
+                eyebrow='Holiday Events'
+                title='Celebrate the Season With Us'
+                desc='Themed nights, festive activities, and family traditions — reserve early for popular holiday dates.'
+              />
+              <SubLabel text='Holiday lineup' />
+              {events.filter(e => e.tags.includes('holiday')).length > 0 ? (
+                <div className='grid grid-cols-3 gap-3.5 mb-2 max-md:grid-cols-1'>
+                  {events
+                    .filter(e => e.tags.includes('holiday'))
+                    .map(e => {
+                      const firstDate = e.dates[0]
+
+                      return (
+                        <FestivalCard
+                          key={e.id}
+                          item={{
+                            name: e.title,
+                            season: firstDate
+                              ? new Date(firstDate.date).toLocaleDateString('en-US', { month: 'long' })
+                              : 'Upcoming',
+                            accent: 'primary',
+                            desc: e.description,
+                          }}
+                        />
+                      )
+                    })}
+                </div>
+              ) : (
+                <p className='text-[14px] leading-relaxed text-[var(--dt-text-muted)] max-w-[560px]'>
+                  Our holiday calendar updates throughout the year. Browse all upcoming dates on Events or book your visit now.
+                </p>
+              )}
+              <div className='mt-6 flex flex-wrap gap-3'>
+                <ActionLink href='/events' accentColor='var(--dt-teal)' className='px-6 py-3 text-sm'>
+                  View Events
+                </ActionLink>
+                <ActionLink href='/book' variant='outline' className='px-6 py-3 text-sm'>
+                  Book a visit
+                </ActionLink>
               </div>
             </Section>
 
@@ -228,7 +316,7 @@ export default function PlayPageClient() {
 
             <Section id='we-bring-play'>
               <SectionHeader
-                eyebrow='We Bring Play To You'
+                eyebrow='Party at your place'
                 title='The Party Comes to You'
                 desc={"Can't come to us? We'll bring the magic to your backyard, venue, or event space."}
               />

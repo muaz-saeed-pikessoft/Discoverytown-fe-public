@@ -2,6 +2,7 @@ export type SectionId =
   | 'open-play'
   | 'private-play'
   | 'special-events'
+  | 'holiday-events'
   | 'camps'
   | 'parents-night-out'
   | 'field-trips'

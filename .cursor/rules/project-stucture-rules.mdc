@@ -4,7 +4,7 @@ globs: ["src/**/*.ts", "src/**/*.tsx", "src/**/*.css"]
 alwaysApply: true
 ---
 
-# PlaySpace Web — Cursor AI Rules
+# DiscoveryTown Web — Cursor AI Rules
 # Next.js 14 App Router + TypeScript + Tailwind + shadcn/ui
 # Redux Toolkit (UI/auth state) + React Query (server state)
 # Dual-portal: (user) public portal + (admin) staff portal in one repo

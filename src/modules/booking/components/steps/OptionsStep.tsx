@@ -20,7 +20,11 @@ export default function OptionsStep({
       <BookingStepHeader
         eyebrow={service.label}
         title='Pick your package'
-        sub='Select the option that best fits your needs — you can always update it later.'
+        sub={
+          service.id === 'events'
+            ? 'Choose your party package on this step — optional add-ons are selected here too and carry through to checkout.'
+            : 'Select the option that best fits your needs — you can always update it later.'
+        }
         accentColor={accent}
       />
 

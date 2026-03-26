@@ -38,6 +38,8 @@ export interface MenuBoardProps {
   title: string
   subtitle?: string
   accent: string
+  /** Scroll target for in-page jump links */
+  anchorId?: string
 
   rows: MenuRow[]
 

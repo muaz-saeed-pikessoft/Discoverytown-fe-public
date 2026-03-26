@@ -47,6 +47,11 @@ export interface BookingState {
   email: string
   phone: string
   notes: string
+  waiverAccepted: boolean
+  discountCode: string
+  tipPercent: number
+  donationDollars: string
+  passCardFee: boolean
 }
 
 export enum BookingStepIndex {

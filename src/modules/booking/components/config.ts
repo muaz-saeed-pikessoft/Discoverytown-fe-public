@@ -34,6 +34,11 @@ export function createInitialBookingState(service: ServiceId | null, option: str
     email: '',
     phone: '',
     notes: '',
+    waiverAccepted: false,
+    discountCode: '',
+    tipPercent: 0,
+    donationDollars: '',
+    passCardFee: false,
   }
 }
 

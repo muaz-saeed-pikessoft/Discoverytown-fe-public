@@ -15,7 +15,8 @@ const exploreLinks = [
   { label: 'Play',              href: '/play' },
   { label: 'Cafe & Food',       href: '/cafeAndfood' },
   { label: 'Events',            href: '/events' },
-  { label: 'Gym & Learn',       href: '/gym' },
+  { label: 'Gym',               href: '/gym' },
+  { label: 'Learn',             href: '/learn' },
   { label: 'Book a Session',    href: '/book' },
 ]
 
@@ -28,7 +29,7 @@ const contactInfo = [
 
 const whyUs = [
   { icon: '🛡️', text: 'Safe & Sanitized' },
-  { icon: '👶', text: 'Ages 1–12 Welcome' },
+  { icon: '👶', text: 'Ages 0–10 Welcome' },
   { icon: '🎓', text: 'Certified Instructors' },
   { icon: '⭐', text: '4.9 Star Rating' },
   { icon: '📱', text: 'Book Online 24/7' },

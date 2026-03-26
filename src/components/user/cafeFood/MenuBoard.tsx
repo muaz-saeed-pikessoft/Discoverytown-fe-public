@@ -2,9 +2,21 @@ import type { MenuBoardProps } from './types'
 import MenuCard from './MenuCard'
 import type { MenuRow } from './pageTypes'
 
-export default function MenuBoard({ title, subtitle, accent, rows, cartQty, onAdd, onRemove }: MenuBoardProps) {
+export default function MenuBoard({
+  title,
+  subtitle,
+  accent,
+  anchorId,
+  rows,
+  cartQty,
+  onAdd,
+  onRemove,
+}: MenuBoardProps) {
   return (
-    <div className='rounded-2xl border border-[var(--dt-border)] bg-[var(--dt-bg-card)] overflow-hidden transition-shadow duration-200 shadow-[0_0_0_1px_rgba(29,127,229,0.08),0_8px_24px_rgba(10,15,30,0.07)] hover:shadow-[0_0_0_1px_rgba(29,127,229,0.16),0_12px_30px_rgba(10,15,30,0.09)]'>
+    <div
+      id={anchorId}
+      className='rounded-2xl border border-[var(--dt-border)] bg-[var(--dt-bg-card)] overflow-hidden transition-shadow duration-200 shadow-[0_0_0_1px_rgba(29,127,229,0.08),0_8px_24px_rgba(10,15,30,0.07)] hover:shadow-[0_0_0_1px_rgba(29,127,229,0.16),0_12px_30px_rgba(10,15,30,0.09)] scroll-mt-[120px]'
+    >
       <div className='px-5 py-4 border-b border-[var(--dt-border)]' style={{ background: `${accent}12` }}>
         <p className='dt-font-heading text-[18px] font-black leading-[1.2] mb-1' style={{ color: 'var(--dt-dark)' }}>
           {title}

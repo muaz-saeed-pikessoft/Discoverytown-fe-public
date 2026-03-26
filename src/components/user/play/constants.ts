@@ -16,11 +16,13 @@ export const SOFT_BG = '#f8f7f4'
 export const NAV: NavItem[] = [
   { id: 'open-play', label: 'Open Play' },
   { id: 'private-play', label: 'Private Play' },
-  { id: 'special-events', label: 'Special Events' },
+
   { id: 'camps', label: 'Camps' },
+  { id: 'special-events', label: 'Special Events' },
+  { id: 'holiday-events', label: 'Holiday Events' },
   { id: 'parents-night-out', label: 'Night Out' },
   { id: 'field-trips', label: 'Field Trips' },
-  { id: 'we-bring-play', label: 'We Bring Play' },
+  { id: 'we-bring-play', label: 'Party at your place' },
 ]
 
 export const PASSES: PassItem[] = [

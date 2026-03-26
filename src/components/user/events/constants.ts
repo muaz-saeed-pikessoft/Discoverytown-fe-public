@@ -11,7 +11,7 @@ export const NAV_SECTIONS: NavSectionItem[] = [
   { id: 'packages', label: 'Packages' },
   { id: 'add-ons', label: 'Add-Ons' },
   { id: 'takeout-party', label: 'Take Out Party' },
-  { id: 'we-bring-party', label: 'We Bring The Party' },
+  { id: 'we-bring-party', label: 'Party at your place' },
 ]
 
 export const PRIVATE_PACKAGES: PrivatePackageItem[] = [
