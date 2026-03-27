@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 
-import PageHeader from '@/components/shared/PageHeader'
+import AccountShell from '@/portal/user/features/account/components/AccountShell'
 import LoadingSkeleton from '@/components/shared/LoadingSkeleton'
 import ErrorState from '@/components/shared/ErrorState'
 import EmptyState from '@/components/shared/EmptyState'
@@ -31,45 +31,47 @@ export default function MyBookingsPage() {
   }, [bookings, tab])
 
   return (
-    <div className='space-y-4'>
-      <PageHeader title='My bookings' subtitle='Your upcoming and past bookings.' />
-
-      <div className='flex items-center gap-2 rounded-2xl border border-gray-200 bg-white p-2'>
-        {(
-          [
-            { id: 'upcoming', label: 'Upcoming' },
-            { id: 'past', label: 'Past' },
-            { id: 'cancelled', label: 'Cancelled' },
-          ] as const
-        ).map(t => (
-          <button
-            key={t.id}
-            type='button'
-            onClick={() => setTab(t.id)}
-            className={[
-              'h-10 rounded-xl px-4 text-xs font-black uppercase tracking-widest transition',
-              tab === t.id ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-50',
-            ].join(' ')}
-          >
-            {t.label}
-          </button>
-        ))}
-      </div>
-
-      {bookingsQuery.isLoading ? (
-        <LoadingSkeleton variant='page' />
-      ) : bookingsQuery.isError ? (
-        <ErrorState title='Failed to load bookings' onRetry={() => void bookingsQuery.refetch()} />
-      ) : filtered.length === 0 ? (
-        <EmptyState title='No bookings' description='Browse activities to make your first booking.' />
-      ) : (
-        <div className='grid gap-3'>
-          {filtered.map(b => (
-            <BookingHistoryCard key={b.id} booking={b} />
+    <AccountShell title='Bookings' subtitle='See your upcoming bookings and your history.'>
+      <div className='space-y-4'>
+        <div className='flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--dt-border)] bg-white/80 p-2 shadow-sm backdrop-blur-xl'>
+          {(
+            [
+              { id: 'upcoming', label: 'Upcoming' },
+              { id: 'past', label: 'Past' },
+              { id: 'cancelled', label: 'Cancelled' },
+            ] as const
+          ).map(t => (
+            <button
+              key={t.id}
+              type='button'
+              onClick={() => setTab(t.id)}
+              className={[
+                'rounded-[999px] px-4 py-2 text-[12px] font-black uppercase tracking-[0.14em] transition',
+                tab === t.id
+                  ? 'bg-[var(--dt-primary)] text-white shadow-[0_14px_34px_rgba(47,111,237,0.24)]'
+                  : 'text-[var(--dt-text-body)] hover:bg-[var(--dt-bg-page)] hover:text-[var(--dt-primary)]',
+              ].join(' ')}
+            >
+              {t.label}
+            </button>
           ))}
         </div>
-      )}
-    </div>
+
+        {bookingsQuery.isLoading ? (
+          <LoadingSkeleton variant='page' />
+        ) : bookingsQuery.isError ? (
+          <ErrorState title='Failed to load bookings' onRetry={() => void bookingsQuery.refetch()} />
+        ) : filtered.length === 0 ? (
+          <EmptyState title='No bookings' description='Browse activities to make your first booking.' />
+        ) : (
+          <div className='grid gap-3'>
+            {filtered.map(b => (
+              <BookingHistoryCard key={b.id} booking={b} />
+            ))}
+          </div>
+        )}
+      </div>
+    </AccountShell>
   )
 }
 

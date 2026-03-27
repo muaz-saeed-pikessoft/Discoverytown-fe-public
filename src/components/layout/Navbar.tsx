@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useSelector } from 'react-redux'
 
 import { ROUTES } from '@/constants/routes'
@@ -24,8 +24,23 @@ export default function Navbar() {
   const pathname = usePathname()
   const { isAuthenticated } = useSelector((state: RootState) => state.auth)
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [mounted, setMounted] = useState(false)
 
   const isActive = (href: string) => pathname === href
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const accountHref = useMemo(() => {
+    if (!mounted) return ROUTES.USER.LOGIN
+    return isAuthenticated ? ROUTES.USER.MY_ACCOUNT : ROUTES.USER.LOGIN
+  }, [isAuthenticated, mounted])
+
+  const accountLabel = useMemo(() => {
+    if (!mounted) return 'Sign In'
+    return isAuthenticated ? 'My Account' : 'Sign In'
+  }, [isAuthenticated, mounted])
 
   return (
     <header className='sticky top-0 z-50 border-b border-black/[0.05] bg-[var(--dt-bg-navbar)] backdrop-blur-xl shadow-[0_8px_28px_rgba(20,35,59,0.06)] dt-font-body'>
@@ -58,10 +73,10 @@ export default function Navbar() {
 
           <div className='hidden md:flex items-center gap-2 ml-auto'>
             <Link
-              href={isAuthenticated ? ROUTES.USER.MY_ACCOUNT : ROUTES.USER.LOGIN}
+              href={accountHref}
               className='rounded-[999px] border border-[var(--dt-border)] bg-white px-4 py-2.5 text-[length:var(--dt-fs-nav)] font-bold text-[var(--dt-text-body)] no-underline transition-all duration-150 hover:border-[var(--dt-primary)] hover:text-[var(--dt-primary)]'
             >
-              {isAuthenticated ? 'My Account' : 'Sign In'}
+              {accountLabel}
             </Link>
 
             <Link
@@ -111,10 +126,10 @@ export default function Navbar() {
 
           <div className='flex flex-col gap-2'>
             <Link
-              href={isAuthenticated ? ROUTES.USER.MY_ACCOUNT : ROUTES.USER.LOGIN}
+              href={accountHref}
               className='flex items-center gap-2 rounded-[14px] bg-[var(--dt-bg-page)] px-3 py-2.5 text-[14px] font-bold text-[var(--dt-text-body)] no-underline'
             >
-              👤 {isAuthenticated ? 'My Account' : 'Sign In'}
+              👤 {accountLabel}
             </Link>
             {isAuthenticated ? (
               <Link

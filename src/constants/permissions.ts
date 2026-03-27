@@ -37,6 +37,11 @@ export const DEFAULT_ALL_PERMISSIONS: PermissionMap = ADMIN_MODULES.reduce<Permi
   return acc
 }, {})
 
+export const DEFAULT_DEV_VIEW_PERMISSIONS: PermissionMap = ADMIN_MODULES.reduce<PermissionMap>((acc, def) => {
+  acc[def.module] = def.module === 'clients' || def.module === 'scheduling' ? ['view'] : []
+  return acc
+}, {})
+
 function isoNow(): string {
   return new Date().toISOString()
 }

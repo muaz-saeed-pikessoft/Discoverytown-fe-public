@@ -1,0 +1,2 @@
+export { useSoftDeleteContact } from './useClientMutations'
+

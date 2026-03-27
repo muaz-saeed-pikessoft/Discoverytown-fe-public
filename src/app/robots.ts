@@ -5,7 +5,7 @@ import ENV from '@/config/env'
 export default function robots(): MetadataRoute.Robots {
   const base = ENV.SITE_URL || ENV.NEXTAUTH_URL || ''
   return {
-    rules: [{ userAgent: '*', allow: '/', disallow: ['/admin/', '/api/'] }],
+    rules: [{ userAgent: '*', allow: '/', disallow: ['/admin/', '/api/', '/my-account/'] }],
     sitemap: base ? `${base}/sitemap.xml` : undefined,
   }
 }

@@ -51,6 +51,7 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: 'Families', href: '/admin/clients', icon: '👨‍👩‍👧‍👦' },
       { label: 'Waivers', href: '/admin/clients/waivers', icon: '📝' },
+      { label: 'Documents', href: '/admin/clients/documents', icon: '📄' },
       { label: 'Memberships', href: '/admin/clients/memberships', icon: '🎟️' },
       { label: 'Class Packs', href: '/admin/clients/class-packs', icon: '📦' },
       { label: 'Tags', href: '/admin/clients/tags', icon: '🏷️' },

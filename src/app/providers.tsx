@@ -2,15 +2,17 @@
 
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
-import { Provider } from 'react-redux'
+import { Provider, useDispatch, useSelector } from 'react-redux'
 import { SessionProvider } from 'next-auth/react'
 import { ToastContainer } from 'react-toastify'
 import { NuqsAdapter } from 'nuqs/adapters/next/app'
 
+import ENV from '@/config/env'
 import MswProvider, { useMswReady } from '@/mocks/MswProvider'
 import { ThemeProvider } from '@/provider/theme-provider'
-import reduxStore from '@/store/store'
+import reduxStore, { RootState } from '@/store/store'
 import { isApiError } from '@/lib/api/errors'
+import { login } from '@/store/slices/authSlice'
 
 /**
  * Listens for MSW becoming ready and immediately invalidates all React Query
@@ -29,6 +31,31 @@ function MswQueryInvalidator({ children }: { children: React.ReactNode }) {
   }, [mswReady, queryClient])
 
   return <>{children}</>
+}
+
+/**
+ * Automatically logs in a development user if BYPASS_USER_AUTH is true.
+ * Ensures the 'access_token' cookie and Redux state are present for a 
+ * seamless dev experience without manual login.
+ */
+function DevAuthManager() {
+  const dispatch = useDispatch()
+  const isAuthenticated = useSelector((state: RootState) => state.auth.isAuthenticated)
+
+  useEffect(() => {
+    if (ENV.BYPASS_USER_AUTH && !isAuthenticated) {
+      // Set the legacy session cookie for middleware/API requests
+      document.cookie = 'access_token=dev-token; path=/; max-age=86400'
+      
+      // Update Redux state to reflect 'logged-in' status for the UI
+      dispatch(login({ 
+        email: 'dev@discoverytown.dev', 
+        name: 'Developer Bypass' 
+      }))
+    }
+  }, [isAuthenticated, dispatch])
+
+  return null
 }
 
 export default function Providers({ children }: { children: React.ReactNode }) {
@@ -67,6 +94,7 @@ export default function Providers({ children }: { children: React.ReactNode }) {
                     pauseOnHover
                     theme='light'
                   />
+                  {ENV.BYPASS_USER_AUTH && <DevAuthManager />}
                   {children}
                 </NuqsAdapter>
               </MswQueryInvalidator>
