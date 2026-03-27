@@ -25,7 +25,7 @@ export default function StaffGuard({ children, allowedRoles }: StaffGuardProps) 
   }
 
   const router = useRouter()
-  const pathname = usePathname()
+  const pathname = usePathname() ?? ''
   const { data: session, status } = useSession()
   const dispatch = useAppDispatch()
 

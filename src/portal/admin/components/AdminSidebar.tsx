@@ -36,8 +36,11 @@ const NAV_GROUPS: NavGroup[] = [
     icon: '📅',
     requiredModule: 'scheduling',
     items: [
-      { label: 'Events', href: '/admin/scheduling', icon: '🎫' },
+      { label: 'Sessions', href: '/admin/scheduling', icon: '🎫' },
       { label: 'Calendar', href: '/admin/scheduling/calendar', icon: '🗓️' },
+      { label: 'Services', href: '/admin/scheduling/services', icon: '🧩' },
+      { label: 'Add-ons', href: '/admin/scheduling/add-ons', icon: '➕' },
+      { label: 'Locations', href: '/admin/scheduling/locations', icon: '📍' },
     ],
   },
   {
@@ -128,7 +131,7 @@ const NAV_GROUPS: NavGroup[] = [
 ] as const
 
 export default function AdminSidebar() {
-  const pathname = usePathname()
+  const pathname = usePathname() ?? ''
   const dispatch = useAppDispatch()
   const sidebarCollapsed = useAppSelector(state => state.ui.sidebarCollapsed)
   const permissions = useAppSelector(state => state.permission.permissions)

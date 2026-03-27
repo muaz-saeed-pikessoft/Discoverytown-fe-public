@@ -8,11 +8,15 @@
 import { authHandlers } from './authHandlers'
 import { bookingHandlers } from './bookingHandlers'
 import { commerceHandlers } from './commerceHandlers'
+import { publicSchedulingHandlers } from './publicSchedulingHandlers'
+import { schedulingHandlers } from './schedulingHandlers'
 import { userHandlers } from './userHandlers'
 
 export const handlers = [
   ...authHandlers,
   ...bookingHandlers,
   ...userHandlers,
+  ...publicSchedulingHandlers,
+  ...schedulingHandlers,
   ...commerceHandlers,
 ]

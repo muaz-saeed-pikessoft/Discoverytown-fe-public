@@ -7,6 +7,12 @@ const ENV = {
   /** Base URL for the backend API */
   API_BASE_URL: process.env.NEXT_PUBLIC_API_URL ?? '',
 
+  /** Public tenantId for consumer (SEO/public) endpoints */
+  TENANT_ID: process.env.NEXT_PUBLIC_TENANT_ID ?? '',
+
+  /** Canonical public site URL (SEO) */
+  SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? '',
+
   /** App environment label */
   APP_ENV: (process.env.NEXT_PUBLIC_APP_ENV ?? process.env.NODE_ENV ?? 'development') as
     | 'development'

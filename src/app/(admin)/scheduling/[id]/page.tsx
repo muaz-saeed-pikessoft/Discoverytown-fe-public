@@ -1,18 +1,11 @@
-'use client'
-
-import EmptyState from '@/components/shared/EmptyState'
-import PageHeader from '@/components/shared/PageHeader'
+import SlotDetailPageClient from '@/portal/admin/features/scheduling/components/SlotDetailPageClient'
 
 interface AdminSchedulingDetailPageProps {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
-export default function AdminSchedulingDetailPage({ params }: AdminSchedulingDetailPageProps) {
-  return (
-    <div>
-      <PageHeader title='Event' subtitle={`Event ID: ${params.id}`} />
-      <EmptyState title='Coming soon' description='Event detail will be available here.' />
-    </div>
-  )
+export default async function AdminSchedulingDetailPage({ params }: AdminSchedulingDetailPageProps) {
+  const { id } = await params
+  return <SlotDetailPageClient slotId={id} />
 }
 

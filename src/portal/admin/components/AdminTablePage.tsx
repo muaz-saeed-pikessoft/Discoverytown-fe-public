@@ -1,7 +1,7 @@
 'use client'
 
 import type { ReactNode } from 'react'
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 
 import PageHeader from '@/components/shared/PageHeader'
 import SearchInput from '@/components/shared/SearchInput'
@@ -29,6 +29,7 @@ interface AdminTablePageProps<T extends { id: string }> {
   selectable?: boolean
   pageSize?: number
   isLoading?: boolean
+  onSelectionChange?: (selectedIds: Set<string>) => void
 }
 
 function toSearchText(value: unknown): string {
@@ -52,6 +53,7 @@ export default function AdminTablePage<T extends { id: string }>({
   selectable = false,
   pageSize = 10,
   isLoading = false,
+  onSelectionChange,
 }: AdminTablePageProps<T>) {
   const [query, setQuery] = useState('')
   const perms = useModulePermissions(module ?? '')
@@ -74,6 +76,11 @@ export default function AdminTablePage<T extends { id: string }>({
     defaultSort,
     multiSelect: selectable,
   })
+
+  useEffect(() => {
+    if (!onSelectionChange) return
+    onSelectionChange(selectedIds)
+  }, [onSelectionChange, selectedIds])
 
   const headerActions = useMemo(() => {
     const extra = typeof actions === 'function' ? actions(perms) : actions

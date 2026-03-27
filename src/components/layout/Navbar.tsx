@@ -5,17 +5,19 @@ import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
 
+import { ROUTES } from '@/constants/routes'
 import type { RootState } from '@/store/store'
 
 const links = [
-  { label: 'Play',        href: '/play' },
-  { label: 'Cafe & Food', href: '/cafeAndfood' },
-  { label: 'Events',      href: '/events' },
-  { label: 'Gym',         href: '/gym' },
-  { label: 'Learn',       href: '/learn' },
-  { label: 'Rentals',     href: '/rentals' },
-  { label: 'Gifts',       href: '/gifts' },
-  { label: 'Shop',        href: '/shop' },
+  { label: 'Activities', href: ROUTES.USER.ACTIVITIES },
+  { label: 'Play', href: ROUTES.USER.PLAY },
+  { label: 'Cafe & Food', href: ROUTES.USER.CAFE },
+  { label: 'Events', href: ROUTES.USER.EVENTS },
+  { label: 'Gym', href: ROUTES.USER.GYM },
+  { label: 'Learn', href: ROUTES.USER.LEARN },
+  { label: 'Rentals', href: ROUTES.USER.RENTALS },
+  { label: 'Gifts', href: ROUTES.USER.GIFTS },
+  { label: 'Shop', href: ROUTES.USER.SHOP },
 ]
 
 export default function Navbar() {
@@ -56,14 +58,14 @@ export default function Navbar() {
 
           <div className='hidden md:flex items-center gap-2 ml-auto'>
             <Link
-              href={isAuthenticated ? '/my-account' : '/login'}
+              href={isAuthenticated ? ROUTES.USER.MY_ACCOUNT : ROUTES.USER.LOGIN}
               className='rounded-[999px] border border-[var(--dt-border)] bg-white px-4 py-2.5 text-[length:var(--dt-fs-nav)] font-bold text-[var(--dt-text-body)] no-underline transition-all duration-150 hover:border-[var(--dt-primary)] hover:text-[var(--dt-primary)]'
             >
               {isAuthenticated ? 'My Account' : 'Sign In'}
             </Link>
 
             <Link
-              href='/book'
+              href={ROUTES.USER.BOOK}
               className='dt-btn-primary px-5 py-2.5'
             >
               Book Now
@@ -109,13 +111,21 @@ export default function Navbar() {
 
           <div className='flex flex-col gap-2'>
             <Link
-              href={isAuthenticated ? '/my-account' : '/login'}
+              href={isAuthenticated ? ROUTES.USER.MY_ACCOUNT : ROUTES.USER.LOGIN}
               className='flex items-center gap-2 rounded-[14px] bg-[var(--dt-bg-page)] px-3 py-2.5 text-[14px] font-bold text-[var(--dt-text-body)] no-underline'
             >
               👤 {isAuthenticated ? 'My Account' : 'Sign In'}
             </Link>
+            {isAuthenticated ? (
+              <Link
+                href={ROUTES.USER.MY_BOOKINGS}
+                className='flex items-center gap-2 rounded-[14px] bg-[var(--dt-bg-page)] px-3 py-2.5 text-[14px] font-bold text-[var(--dt-text-body)] no-underline'
+              >
+                📅 My Bookings
+              </Link>
+            ) : null}
             <Link
-              href='/book'
+              href={ROUTES.USER.BOOK}
               className='dt-btn-primary flex items-center justify-center gap-1.5 px-3 py-3 text-[14px]'
             >
               ✨ Book Now

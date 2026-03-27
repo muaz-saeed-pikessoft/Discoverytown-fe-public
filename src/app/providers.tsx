@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react'
 import { Provider } from 'react-redux'
 import { SessionProvider } from 'next-auth/react'
 import { ToastContainer } from 'react-toastify'
+import { NuqsAdapter } from 'nuqs/adapters/next/app'
 
 import MswProvider, { useMswReady } from '@/mocks/MswProvider'
 import { ThemeProvider } from '@/provider/theme-provider'
@@ -53,19 +54,21 @@ export default function Providers({ children }: { children: React.ReactNode }) {
           <Provider store={reduxStore}>
             <QueryClientProvider client={queryClient}>
               <MswQueryInvalidator>
-                <ToastContainer
-                  position='top-right'
-                  autoClose={5000}
-                  hideProgressBar={false}
-                  newestOnTop={false}
-                  closeOnClick
-                  rtl={false}
-                  pauseOnFocusLoss
-                  draggable
-                  pauseOnHover
-                  theme='light'
-                />
-                {children}
+                <NuqsAdapter>
+                  <ToastContainer
+                    position='top-right'
+                    autoClose={5000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                    theme='light'
+                  />
+                  {children}
+                </NuqsAdapter>
               </MswQueryInvalidator>
             </QueryClientProvider>
           </Provider>

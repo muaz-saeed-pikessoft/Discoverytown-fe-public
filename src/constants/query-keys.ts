@@ -13,8 +13,17 @@ export const QUERY_KEYS = {
       EVENTS: (filters?: object) => ['admin', 'events', filters] as const,
       EVENT: (id: string) => ['admin', 'events', id] as const,
       CALENDAR: (params?: object) => ['admin', 'calendar', params] as const,
+      SLOTS: (filters?: object) => ['admin', 'scheduling', 'slots', filters] as const,
+      SLOT: (id: string) => ['admin', 'scheduling', 'slots', id] as const,
+      ROSTER: (slotId: string) => ['admin', 'scheduling', 'slots', slotId, 'roster'] as const,
+      WAITLIST: (slotId: string) => ['admin', 'scheduling', 'slots', slotId, 'waitlist'] as const,
+      BOOKINGS: (filters?: object) => ['admin', 'scheduling', 'bookings', filters] as const,
+      SERVICES: (filters?: object) => ['admin', 'scheduling', 'services', filters] as const,
+      CATEGORIES: ['admin', 'scheduling', 'service-categories'] as const,
       LOCATIONS: ['admin', 'locations'] as const,
-      ADD_ONS: ['admin', 'add-ons'] as const,
+      ADD_ONS: (filters?: object) => ['admin', 'add-ons', filters] as const,
+      STAFF_AVAILABILITY: (staffId: string, startAt: string, endAt: string) =>
+        ['admin', 'scheduling', 'staff-availability', staffId, startAt, endAt] as const,
     },
     CLIENTS: {
       FAMILIES: (filters?: object) => ['admin', 'families', filters] as const,
@@ -54,6 +63,17 @@ export const QUERY_KEYS = {
     BOOKINGS: (filters?: object) => ['user', 'bookings', filters] as const,
     ACCOUNT: ['user', 'account'] as const,
     EVENTS_PARTY_PAGE: ['user', 'events', 'party-page'] as const,
+    SCHEDULING: {
+      PUBLIC_SLOTS: (filters?: object) => ['public', 'slots', filters] as const,
+      PUBLIC_SLOT: (id: string) => ['public', 'slots', id] as const,
+      PUBLIC_SERVICES: (filters?: object) => ['public', 'services', filters] as const,
+      PUBLIC_SERVICE_CATEGORIES: ['public', 'service-categories'] as const,
+      PUBLIC_LOCATIONS: ['public', 'locations'] as const,
+      OPEN_AVAILABILITY: (serviceId: string, date: string) => ['public', 'open-availability', serviceId, date] as const,
+      MY_BOOKINGS: (filters?: object) => ['user', 'my-bookings', filters] as const,
+      MY_BOOKING: (id: string) => ['user', 'my-bookings', id] as const,
+      MY_UPCOMING: ['user', 'upcoming'] as const,
+    },
   },
 } as const
 

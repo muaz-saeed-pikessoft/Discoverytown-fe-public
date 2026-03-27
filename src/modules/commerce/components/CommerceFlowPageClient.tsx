@@ -13,8 +13,8 @@ const inputClass =
 
 export default function CommerceFlowPageClient() {
   const searchParams = useSearchParams()
-  const categoryParam = searchParams.get('category') as CommerceCategory | null
-  const selectedSlug = searchParams.get('item')
+  const categoryParam = (searchParams?.get('category') ?? null) as CommerceCategory | null
+  const selectedSlug = searchParams?.get('item') ?? null
 
   const category: CommerceCategory = categoryParam && categoryParam in COMMERCE_CATEGORY_META ? categoryParam : 'shop'
   const meta = COMMERCE_CATEGORY_META[category]

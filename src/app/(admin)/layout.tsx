@@ -21,7 +21,7 @@ import { usePermission } from '@/hooks/usePermission'
 
 export default function AdminLayout({ children }: { children: ReactNode }) {
   const bypassAdminAuth = process.env.NEXT_PUBLIC_BYPASS_ADMIN_AUTH === 'true'
-  const pathname = usePathname()
+  const pathname = usePathname() ?? ''
   const dispatch = useAppDispatch()
   const permissionsLoaded = useAppSelector(state => state.permission.isLoaded)
 

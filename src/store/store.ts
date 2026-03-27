@@ -10,6 +10,7 @@ import bookingReducer from './slices/bookingSlice'
 import userReducer from './slices/userSlice'
 import uiReducer from './slices/uiSlice'
 import permissionReducer from './slices/permissionSlice'
+import schedulingReducer from './slices/schedulingSlice'
 
 const store = configureStore({
   reducer: {
@@ -18,6 +19,7 @@ const store = configureStore({
     user: userReducer,
     ui: uiReducer,
     permission: permissionReducer,
+    scheduling: schedulingReducer,
   },
 })
 
