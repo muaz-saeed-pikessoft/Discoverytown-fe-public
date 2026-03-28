@@ -7,6 +7,8 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'images.unsplash.com',
       },
+      { protocol: 'https', hostname: '*.amazonaws.com' },
+      { protocol: 'https', hostname: '*.azure.com' },
     ],
   },
   async headers() {
@@ -16,13 +18,14 @@ const nextConfig = {
      * - Only allow styles from 'self' and 'unsafe-inline' (for Tailwind/Next.js).
      * - Restrict framing to 'none'.
      */
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL ?? ''
     const cspHeader = `
       default-src 'self';
       script-src 'self' 'unsafe-eval' 'unsafe-inline';
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
       img-src 'self' blob: data: https://images.unsplash.com;
       font-src 'self' https://fonts.gstatic.com;
-      connect-src 'self' https://images.unsplash.com https://fonts.gstatic.com https://fonts.googleapis.com;
+      connect-src 'self' ${apiUrl} https://images.unsplash.com https://fonts.gstatic.com https://fonts.googleapis.com;
       object-src 'none';
       base-uri 'self';
       form-action 'self';
@@ -62,6 +65,9 @@ const nextConfig = {
         ],
       },
     ];
+  },
+  async redirects() {
+    return [{ source: '/admin', destination: '/admin/dashboard', permanent: false }]
   },
 };
 

@@ -3,11 +3,14 @@
 import { QueryClient, QueryClientProvider, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { Provider } from 'react-redux'
+import { SessionProvider } from 'next-auth/react'
 import { ToastContainer } from 'react-toastify'
+import { NuqsAdapter } from 'nuqs/adapters/next/app'
 
 import MswProvider, { useMswReady } from '@/mocks/MswProvider'
 import { ThemeProvider } from '@/provider/theme-provider'
 import reduxStore from '@/store/store'
+import { isApiError } from '@/lib/api/errors'
 
 /**
  * Listens for MSW becoming ready and immediately invalidates all React Query
@@ -29,30 +32,47 @@ function MswQueryInvalidator({ children }: { children: React.ReactNode }) {
 }
 
 export default function Providers({ children }: { children: React.ReactNode }) {
-  const [queryClient] = useState(() => new QueryClient())
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            staleTime: 30_000,
+            retry: (failureCount, error) => {
+              if (isApiError(error) && error.status > 0 && error.status < 500) return false
+              return failureCount < 2
+            },
+          },
+        },
+      })
+  )
 
   return (
     <MswProvider>
       <ThemeProvider>
-        <Provider store={reduxStore}>
-          <QueryClientProvider client={queryClient}>
-            <MswQueryInvalidator>
-              <ToastContainer
-                position='top-right'
-                autoClose={5000}
-                hideProgressBar={false}
-                newestOnTop={false}
-                closeOnClick
-                rtl={false}
-                pauseOnFocusLoss
-                draggable
-                pauseOnHover
-                theme='light'
-              />
-              {children}
-            </MswQueryInvalidator>
-          </QueryClientProvider>
-        </Provider>
+        <SessionProvider>
+          <Provider store={reduxStore}>
+            <QueryClientProvider client={queryClient}>
+              <MswQueryInvalidator>
+                <NuqsAdapter>
+                  <ToastContainer
+                    position='top-right'
+                    autoClose={5000}
+                    hideProgressBar={false}
+                    newestOnTop={false}
+                    closeOnClick
+                    rtl={false}
+                    pauseOnFocusLoss
+                    draggable
+                    pauseOnHover
+                    theme='light'
+                  />
+                  {children}
+                </NuqsAdapter>
+              </MswQueryInvalidator>
+            </QueryClientProvider>
+          </Provider>
+        </SessionProvider>
       </ThemeProvider>
     </MswProvider>
   )

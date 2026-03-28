@@ -1,8 +1,8 @@
-import HeroSection from '@/components/user/home/HeroSection'
-import WhatWeOfferSection from '@/components/user/home/WhatWeOfferSection'
-import WhyFamiliesLoveUsSection from '@/components/user/home/WhyFamiliesLoveUsSection'
-import SocialProofSection from '@/components/user/home/SocialProofSection'
-import CtaBannerSection from '@/components/user/home/CtaBannerSection'
+import HeroSection from '@/portal/user/components/home/HeroSection'
+import WhatWeOfferSection from '@/portal/user/components/home/WhatWeOfferSection'
+import WhyFamiliesLoveUsSection from '@/portal/user/components/home/WhyFamiliesLoveUsSection'
+import SocialProofSection from '@/portal/user/components/home/SocialProofSection'
+import CtaBannerSection from '@/portal/user/components/home/CtaBannerSection'
 
 export default function HomePage() {
   return (

@@ -12,10 +12,12 @@ import axios from 'axios'
 import type { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
 
 import ENV from '@/config/env'
+import { ApiError } from '@/lib/api/errors'
 
 /** Token storage keys */
 const TOKEN_KEY = 'access_token'
 const REFRESH_TOKEN_KEY = 'refresh_token'
+const DEVICE_ID_KEY = 'device_id'
 
 /** Flag to prevent multiple simultaneous refresh attempts */
 let isRefreshing = false
@@ -96,6 +98,13 @@ function createApiClient(): AxiosInstance {
         config.headers.Authorization = `Bearer ${accessToken}`
       }
 
+      if (typeof window !== 'undefined') {
+        const deviceId = window.localStorage.getItem(DEVICE_ID_KEY)
+        if (deviceId) {
+          config.headers['X-Device-ID'] = deviceId
+        }
+      }
+
       config.headers['Accept-Language'] = typeof navigator !== 'undefined' ? navigator.language : 'en'
 
       return config
@@ -117,7 +126,7 @@ function createApiClient(): AxiosInstance {
       }
 
       if (!originalRequest) {
-        return Promise.reject(error)
+        return Promise.reject(toApiError(error))
       }
 
       /** Handle 401 Unauthorized */
@@ -139,21 +148,34 @@ function createApiClient(): AxiosInstance {
 
         const refreshToken = getCookieValue(REFRESH_TOKEN_KEY)
 
-        if (!refreshToken) {
-          handleLogout()
-
-          return Promise.reject(error)
-        }
-
         try {
-          const { data } = await axios.post(`${ENV.API_BASE_URL}/auth/refresh`, { refreshToken })
+          /**
+           * Refresh strategy:
+           * - Legacy user auth: refresh via /auth/refresh with refreshToken cookie value
+           * - Staff auth: attempt /api/v1/auth/staff/refresh (cookie-based) when legacy refreshToken is absent
+           */
+          const refreshResponse = refreshToken
+            ? await axios.post(`${ENV.API_BASE_URL}/auth/refresh`, { refreshToken })
+            : await axios.post(`${ENV.API_BASE_URL}/api/v1/auth/staff/refresh`, undefined, {
+                withCredentials: true,
+              })
 
-          const newAccessToken = data?.accessToken as string
-          const newRefreshToken = data?.refreshToken as string
+          const newAccessToken = (refreshResponse.data?.accessToken ?? refreshResponse.data?.data?.accessToken) as
+            | string
+            | undefined
+          const newRefreshToken = (refreshResponse.data?.refreshToken ?? refreshResponse.data?.data?.refreshToken) as
+            | string
+            | undefined
+
+          if (!newAccessToken) {
+            throw new Error('Token refresh failed: missing access token')
+          }
 
           if (typeof document !== 'undefined') {
             document.cookie = `${TOKEN_KEY}=${newAccessToken}; path=/; SameSite=Strict; Secure`
-            document.cookie = `${REFRESH_TOKEN_KEY}=${newRefreshToken}; path=/; SameSite=Strict; Secure`
+            if (newRefreshToken) {
+              document.cookie = `${REFRESH_TOKEN_KEY}=${newRefreshToken}; path=/; SameSite=Strict; Secure`
+            }
           }
 
           originalRequest.headers.Authorization = `Bearer ${newAccessToken}`
@@ -164,13 +186,13 @@ function createApiClient(): AxiosInstance {
           processQueue(refreshError, null)
           handleLogout()
 
-          return Promise.reject(refreshError)
+          return Promise.reject(toApiError(refreshError))
         } finally {
           isRefreshing = false
         }
       }
 
-      return Promise.reject(error)
+      return Promise.reject(toApiError(error))
     }
   )
 
@@ -188,6 +210,37 @@ function handleLogout(): void {
   if (typeof window !== 'undefined') {
     window.location.href = '/login'
   }
+}
+
+function toApiError(error: unknown): unknown {
+  if (!axios.isAxiosError(error)) return error
+
+  const status = error.response?.status ?? 0
+  const data = error.response?.data as unknown
+
+  if (data && typeof data === 'object') {
+    const anyData = data as {
+      success?: boolean
+      error?: { code?: string; message?: string; details?: unknown }
+      message?: string
+      code?: string
+      details?: unknown
+    }
+
+    const code = anyData.error?.code ?? anyData.code ?? 'UNKNOWN_ERROR'
+    const message = anyData.error?.message ?? anyData.message ?? error.message
+    const details = anyData.error?.details ?? anyData.details
+
+    if (status > 0) {
+      return new ApiError(code, message, status, details)
+    }
+  }
+
+  if (status > 0) {
+    return new ApiError('HTTP_ERROR', error.message, status)
+  }
+
+  return error
 }
 
 /** Singleton API client instance */

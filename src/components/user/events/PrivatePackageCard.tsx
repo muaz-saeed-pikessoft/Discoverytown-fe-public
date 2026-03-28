@@ -10,8 +10,7 @@ import ActionLink from '@/components/shared/ActionLink'
 export default function PrivatePackageCard({ pkg }: PrivatePackageCardProps) {
   const [hover, setHover] = useState(false)
 
-  const optionSlug =
-    pkg.id === 'mini' ? 'private-room-silver' : pkg.id === 'classic' ? 'private-room-gold' : 'private-room-platinum'
+  const optionSlug = `private-room-${pkg.id}`
 
   return (
     <div

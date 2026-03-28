@@ -10,12 +10,7 @@ import type { RawBookingResponse } from '@/data/adapters/bookingAdapter'
 import type { RawCommerceItemResponse } from '@/data/adapters/commerceAdapter'
 import type { RawProfileResponse } from '@/data/adapters/userAdapter'
 
-import type {
-  RawClassEventResponse,
-  RawPartyPackageResponse,
-  RawSpecialEventResponse,
-  RawTimeSlotResponse,
-} from '@/data/adapters/bookingAdapter'
+import type { RawClassEventResponse, RawSpecialEventResponse, RawTimeSlotResponse } from '@/data/adapters/bookingAdapter'
 
 import type {
   RawLoginResponse,
@@ -27,9 +22,9 @@ import type { RawOrderConfirmationResponse } from '@/data/adapters/commerceAdapt
 import type { StorefrontCommerceItem } from '@/api/commerceApi'
 
 import { slugify } from '@/utils/slugify'
-import { GIFT_COLLECTIONS, ALACARTE_GROUPS } from '@/components/user/gifts/constants'
-import { RENTAL_SECTIONS } from '@/components/user/rentals/constants'
-import { FILTER_TAGS, SHOP_SECTIONS } from '@/components/user/shop/constants'
+import { GIFT_COLLECTIONS, ALACARTE_GROUPS } from '@/portal/user/components/gifts/constants'
+import { RENTAL_SECTIONS } from '@/portal/user/components/rentals/constants'
+import { FILTER_TAGS, SHOP_SECTIONS } from '@/portal/user/components/shop/constants'
 import {
   HOT_DRINKS,
   COLD_DRINKS,
@@ -43,8 +38,8 @@ import {
   KIDS_CORNER,
   SALADS,
   SNACKS,
-} from '@/components/user/cafeFood/constants'
-import { normalizeRows } from '@/components/user/cafeFood/pageHelpers'
+} from '@/portal/user/components/cafeFood/constants'
+import { normalizeRows } from '@/portal/user/components/cafeFood/pageHelpers'
 
 /* ── Auth ── */
 
@@ -55,8 +50,8 @@ export const MOCK_LOGIN_RESPONSE: RawLoginResponse = {
     name: 'Mock User',
     role: 'user',
   },
-  access_token: 'mock-access-token',
-  refresh_token: 'mock-refresh-token',
+  access_token: '',
+  refresh_token: '',
 }
 
 export const MOCK_REGISTER_RESPONSE: RawRegisterResponse = {
@@ -66,13 +61,13 @@ export const MOCK_REGISTER_RESPONSE: RawRegisterResponse = {
     name: 'New User',
     role: 'user',
   },
-  access_token: 'mock-access-token',
-  refresh_token: 'mock-refresh-token',
+  access_token: '',
+  refresh_token: '',
 }
 
 export const MOCK_REFRESH_RESPONSE: RawRefreshTokenResponse = {
-  access_token: 'mock-new-access-token',
-  refresh_token: 'mock-new-refresh-token',
+  access_token: '',
+  refresh_token: '',
 }
 
 /* ── Time Slots ── */
@@ -548,150 +543,6 @@ export const MOCK_RAW_EVENTS: RawSpecialEventResponse[] = [
     tags: ['educational', 'literacy', 'all-ages', 'summer'],
     max_capacity: 100,
     registered_count: 18,
-  },
-]
-
-/* ── Party Packages ── */
-
-export const MOCK_RAW_PARTY_PACKAGES: RawPartyPackageResponse[] = [
-  {
-    id: 'pkg-basic',
-    name: 'Basic',
-    tagline: 'Perfect for an intimate celebration',
-    price: 299,
-    deposit_amount: 100,
-    duration: 120,
-    guests_included: 10,
-    price_per_extra_guest: 12,
-    features: [
-      '2 hours exclusive play area access',
-      'Basic balloon decorations',
-      'Dedicated staff host',
-      'Party invitations (10)',
-      'Paper goods & tableware',
-    ],
-    add_ons: [
-      {
-        id: 'ao-cake-b',
-        label: 'Birthday Cake',
-        price: 65,
-        description: 'Custom decorated cake serves 15',
-        pricing_model: 'flat',
-      },
-      {
-        id: 'ao-photo-b',
-        label: 'Digital Photo Package',
-        price: 80,
-        description: '50+ edited digital photos from your event',
-        pricing_model: 'flat',
-      },
-      {
-        id: 'ao-goody-b',
-        label: 'Goody Bags',
-        price: 5,
-        description: 'Pre-filled goody bags per child',
-        pricing_model: 'per-person',
-      },
-    ],
-    color: 'accent',
-    popular: false,
-  },
-  {
-    id: 'pkg-deluxe',
-    name: 'Deluxe',
-    tagline: 'The most popular party experience',
-    price: 499,
-    deposit_amount: 150,
-    duration: 150,
-    guests_included: 20,
-    price_per_extra_guest: 10,
-    features: [
-      '2.5 hours exclusive play area access',
-      'Premium themed decorations',
-      'Dedicated party host + assistant',
-      'Catered snack spread for all guests',
-      'Party invitations (20)',
-      'Premium favor bags',
-      'Custom birthday banner',
-    ],
-    add_ons: [
-      {
-        id: 'ao-cake-d',
-        label: 'Birthday Cake',
-        price: 85,
-        description: 'Custom decorated cake serves 25',
-        pricing_model: 'flat',
-      },
-      {
-        id: 'ao-photo-d',
-        label: 'Professional Photos',
-        price: 120,
-        description: 'Full edited gallery + print package',
-        pricing_model: 'flat',
-      },
-      {
-        id: 'ao-entertainer-d',
-        label: 'Character Appearance',
-        price: 150,
-        description: '30-min costumed character visit',
-        pricing_model: 'flat',
-      },
-      {
-        id: 'ao-photobooth-d',
-        label: 'Photo Booth',
-        price: 95,
-        description: 'Unlimited prints, props included',
-        pricing_model: 'flat',
-      },
-    ],
-    color: 'primary',
-    popular: true,
-  },
-  {
-    id: 'pkg-premium',
-    name: 'Premium',
-    tagline: 'The ultimate Discovery Town experience',
-    price: 799,
-    deposit_amount: 250,
-    duration: 180,
-    guests_included: 30,
-    price_per_extra_guest: 8,
-    features: [
-      '3 hours full venue buyout',
-      'Custom themed décor package',
-      'Two dedicated event hosts',
-      'Full catered meal for all guests',
-      'Party invitations (30)',
-      'Premium favor bags',
-      'Personalized banner + signage',
-      'Professional photo package included',
-      'Dedicated event coordinator',
-    ],
-    add_ons: [
-      {
-        id: 'ao-entertainer-p',
-        label: 'Extra Character Appearance',
-        price: 150,
-        description: 'Second costumed character for your theme',
-        pricing_model: 'flat',
-      },
-      {
-        id: 'ao-video-p',
-        label: 'Video Highlight Reel',
-        price: 200,
-        description: 'Edited 3-min highlight video of the event',
-        pricing_model: 'flat',
-      },
-      {
-        id: 'ao-cake-p',
-        label: 'Multi-Tier Cake',
-        price: 150,
-        description: 'Custom 3-tier decorated cake serves 40',
-        pricing_model: 'flat',
-      },
-    ],
-    color: 'secondary',
-    popular: false,
   },
 ]
 

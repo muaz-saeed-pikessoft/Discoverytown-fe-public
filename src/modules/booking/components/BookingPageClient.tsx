@@ -23,7 +23,7 @@ function getServiceId(value: string | null): ServiceId | null {
 export default function BookingPageClient() {
   const searchParams = useSearchParams()
 
-  const defaultService = getServiceId(searchParams?.get('service'))
+  const defaultService = getServiceId(searchParams?.get('service') ?? null)
   const defaultOption = searchParams?.get('option') || null
   const initialStep = getInitialBookingStep(defaultService, defaultOption)
 

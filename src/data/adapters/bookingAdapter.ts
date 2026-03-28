@@ -13,6 +13,8 @@ import type {
   ClassCategory,
   ClassEvent,
   EventDay,
+  EventsPageAddonGroup,
+  EventsPageCatalog,
   PartyAddOn,
   PartyPackage,
   PricingTier,
@@ -130,7 +132,59 @@ export interface RawPartyPackageResponse {
   add_ons: RawPartyAddOnResponse[]
   color: string
   popular: boolean
+  /** When set, splits Events page into private room vs whole-venue rows */
+  kind?: 'private_room' | 'venue_buyout'
+  image_url?: string
+  price_min?: number
+  price_max?: number
+  adults_included?: number
+  staff_summary?: string
+  deposit_note?: string
+  badge_label?: string | null
+  card_theme?: string
 }
+
+/** Optional Events page catalog returned with party packages (same GET). */
+export interface RawEventsAddonItemResponse {
+  name: string
+  desc: string
+  price: string
+}
+
+export interface RawEventsAddonGroupResponse {
+  title: string
+  anchor: string
+  items: RawEventsAddonItemResponse[]
+  border?: string
+  bg?: string
+  price_bg?: string
+  price_color?: string
+}
+
+export interface RawEventsAddonCategoryCardResponse {
+  name: string
+  desc: string
+  accent: 'primary' | 'teal' | 'dark' | 'amber'
+  anchor: string
+}
+
+export interface RawEventsPageCatalogResponse {
+  addon_category_cards: RawEventsAddonCategoryCardResponse[]
+  addon_groups: RawEventsAddonGroupResponse[]
+  takeout_category_cards: RawEventsAddonCategoryCardResponse[]
+  takeout_groups: RawEventsAddonGroupResponse[]
+  we_bring_services: Array<{ name: string; desc: string }>
+  we_bring_images: Record<string, string>
+  takeout_banner_image_url: string
+}
+
+/** GET /api/party-packages may return a bare array (legacy) or an envelope. */
+export type RawPartyPackagesApiPayload =
+  | RawPartyPackageResponse[]
+  | {
+      packages: RawPartyPackageResponse[]
+      events_page?: RawEventsPageCatalogResponse
+    }
 
 /* ── Adapter functions ── */
 
@@ -138,6 +192,8 @@ export interface RawPartyPackageResponse {
  * Transform a single raw booking response into BookingRecord.
  */
 export function adaptBooking(raw: RawBookingResponse): BookingRecord {
+  const rawGuests = Array.isArray(raw.guests) ? raw.guests : []
+
   return {
     id: raw.id,
     type: raw.booking_type as BookingType,
@@ -147,7 +203,7 @@ export function adaptBooking(raw: RawBookingResponse): BookingRecord {
     status: raw.status as BookingStatus,
     amount: raw.total_amount,
     confirmationCode: raw.confirmation_code,
-    guests: raw.guests.map((guest) => ({
+    guests: rawGuests.map(guest => ({
       id: guest.id,
       name: guest.full_name,
       age: guest.age,
@@ -300,6 +356,14 @@ function adaptPartyAddOn(raw: RawPartyAddOnResponse): PartyAddOn {
 export function adaptPartyPackage(
   raw: RawPartyPackageResponse,
 ): PartyPackage {
+  const kind: PartyPackage['kind'] =
+    raw.kind ?? (raw.color === 'secondary' ? 'venue_buyout' : 'private_room')
+
+  const priceMin = raw.price_min ?? raw.price
+  const priceMax = raw.price_max ?? raw.price
+
+  const cardTheme = (raw.card_theme ?? 'primary') as PartyPackage['cardTheme']
+
   return {
     id: raw.id,
     name: raw.name,
@@ -313,6 +377,15 @@ export function adaptPartyPackage(
     addOns: raw.add_ons.map(adaptPartyAddOn),
     color: raw.color as PartyPackage['color'],
     popular: raw.popular,
+    kind,
+    imageUrl: raw.image_url ?? '',
+    priceMin,
+    priceMax,
+    adultsIncluded: raw.adults_included ?? raw.guests_included,
+    staffSummary: raw.staff_summary ?? 'Full Team',
+    depositNote: raw.deposit_note ?? `$${raw.deposit_amount} deposit`,
+    badgeLabel: raw.badge_label ?? null,
+    cardTheme,
   }
 }
 
@@ -323,4 +396,47 @@ export function adaptPartyPackages(
   raw: RawPartyPackageResponse[],
 ): PartyPackage[] {
   return raw.map(adaptPartyPackage)
+}
+
+function adaptEventsAddonGroup(raw: RawEventsAddonGroupResponse): EventsPageAddonGroup {
+  return {
+    title: raw.title,
+    anchor: raw.anchor,
+    items: raw.items.map(i => ({ name: i.name, desc: i.desc, price: i.price })),
+    border: raw.border ?? 'var(--dt-border)',
+    bg: raw.bg ?? 'var(--dt-bg-card)',
+    priceBg: raw.price_bg ?? 'var(--dt-bg-page)',
+    priceColor: raw.price_color ?? 'var(--dt-text-muted)',
+  }
+}
+
+export function adaptEventsPageCatalog(raw: RawEventsPageCatalogResponse): EventsPageCatalog {
+  return {
+    addonCategoryCards: raw.addon_category_cards.map(c => ({
+      name: c.name,
+      desc: c.desc,
+      accent: c.accent,
+      anchor: c.anchor,
+    })),
+    addonGroups: raw.addon_groups.map(adaptEventsAddonGroup),
+    takeoutCategoryCards: raw.takeout_category_cards.map(c => ({
+      name: c.name,
+      desc: c.desc,
+      accent: c.accent,
+      anchor: c.anchor,
+    })),
+    takeoutGroups: raw.takeout_groups.map(adaptEventsAddonGroup),
+    weBringServices: raw.we_bring_services.map(s => ({ name: s.name, desc: s.desc })),
+    weBringImages: { ...raw.we_bring_images },
+    takeoutBannerImageUrl: raw.takeout_banner_image_url,
+  }
+}
+
+export function parsePartyPackagesPayload(
+  data: RawPartyPackagesApiPayload,
+): { packages: RawPartyPackageResponse[]; eventsPageRaw: RawEventsPageCatalogResponse | undefined } {
+  if (Array.isArray(data)) {
+    return { packages: data, eventsPageRaw: undefined }
+  }
+  return { packages: data.packages, eventsPageRaw: data.events_page }
 }
