@@ -19,7 +19,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   }
 
   // Consumer routes only for now. Slot-specific URLs will be added once public endpoints are implemented.
-  const staticRoutes = ['/', '/activities', '/contact', '/book']
+  const staticRoutes = ['/', '/activities', '/contact', '/book', '/membership', '/class-packs']
 
   const services = await fetchServices()
   const openServiceRoutes = services
@@ -31,7 +31,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return routes.map(r => ({
     url: `${base}${r}`,
     changeFrequency: openServiceRoutes.includes(r) ? 'daily' : 'weekly',
-    priority: r === '/' ? 1.0 : 0.8,
+    priority: r === '/' ? 1.0 : r === '/membership' ? 0.9 : r === '/class-packs' ? 0.8 : 0.8,
     lastModified: new Date(),
   }))
 }

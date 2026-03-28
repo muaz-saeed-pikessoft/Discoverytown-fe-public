@@ -1,29 +1,28 @@
 'use client'
 
-import type { TableColumn } from '@/types/common'
-import StatusBadge from '@/components/shared/StatusBadge'
-import AdminTablePage from '@/portal/admin/components/AdminTablePage'
-import { MOCK_ADMIN_WAIVERS } from '@/portal/admin/features/clients/constants'
-import type { AdminWaiverRow } from '@/portal/admin/features/clients/types'
+import PageHeader from '@/components/shared/PageHeader'
+import DocumentStatusRow from '@/portal/admin/features/clients/components/DocumentStatusRow'
+import { useDocuments } from '@/portal/admin/features/clients/hooks/useDocuments'
 
 export default function AdminClientsWaiversPage() {
-  const columns: TableColumn<AdminWaiverRow>[] = [
-    { key: 'familyName', label: 'Family', sortable: true },
-    { key: 'signedAt', label: 'Signed', sortable: true },
-    { key: 'expiresAt', label: 'Expires', sortable: true },
-    { key: 'status', label: 'Status', sortable: true, render: v => <StatusBadge status={String(v ?? '')} variant='membership' /> },
-  ]
+  const { data: docs = [], isLoading } = useDocuments()
 
   return (
-    <AdminTablePage
-      title='Waivers'
-      subtitle='Manage signed waivers and expirations.'
-      data={MOCK_ADMIN_WAIVERS}
-      columns={columns}
-      defaultSort={{ key: 'expiresAt', direction: 'asc' }}
-      searchableKeys={['id', 'familyName', 'status', 'signedAt', 'expiresAt']}
-      pageSize={10}
-    />
+    <div className='space-y-4'>
+      <PageHeader title='Waivers' subtitle='Manage signed waivers and expirations.' />
+      {isLoading ? (
+        <div className='rounded-2xl border border-gray-200 bg-white p-4 text-sm font-semibold text-gray-500'>Loading waivers…</div>
+      ) : (
+        <div className='space-y-3'>
+          {docs.map(document => (
+            <DocumentStatusRow
+              key={document.id}
+              item={{ document, signature: null, isRequired: true }}
+            />
+          ))}
+        </div>
+      )}
+    </div>
   )
 }
 

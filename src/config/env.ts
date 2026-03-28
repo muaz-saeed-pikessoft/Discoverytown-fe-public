@@ -40,6 +40,10 @@ const ENV = {
   /** Whether MSW mock API is enabled */
   ENABLE_MOCKS: process.env.NEXT_PUBLIC_ENABLE_MOCKS === 'true',
 
+  /** Bypass authentication logic for development */
+  BYPASS_ADMIN_AUTH: process.env.NEXT_PUBLIC_BYPASS_ADMIN_AUTH === 'true',
+  BYPASS_USER_AUTH: process.env.NEXT_PUBLIC_BYPASS_USER_AUTH === 'true',
+
   /** next-auth server-only env vars (read on server only) */
   NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET ?? '',
   NEXTAUTH_URL: process.env.NEXTAUTH_URL ?? '',

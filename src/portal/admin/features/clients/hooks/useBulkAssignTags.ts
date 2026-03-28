@@ -1,0 +1,2 @@
+export { useBulkAssignTags } from './useTags'
+

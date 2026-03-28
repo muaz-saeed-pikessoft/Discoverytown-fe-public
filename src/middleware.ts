@@ -5,6 +5,7 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
   const bypassAdminAuth = process.env.NEXT_PUBLIC_BYPASS_ADMIN_AUTH === 'true'
+  const bypassUserAuth = process.env.NEXT_PUBLIC_BYPASS_USER_AUTH === 'true'
 
   const isAdmin = pathname.startsWith('/admin')
   const isAuthPage = pathname === '/login' || pathname === '/register'
@@ -17,6 +18,10 @@ export function middleware(request: NextRequest) {
   const hasLegacyUserSession = request.cookies.get('access_token')
 
   if (bypassAdminAuth && isAdmin) {
+    return NextResponse.next()
+  }
+
+  if (bypassUserAuth && isMyAccount) {
     return NextResponse.next()
   }
 
@@ -42,6 +47,6 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/my-account', '/login', '/register'],
+  matcher: ['/admin/:path*', '/my-account/:path*', '/login', '/register'],
 }
 

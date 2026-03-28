@@ -1,0 +1,2 @@
+export { useDeleteTag } from './useTags'
+

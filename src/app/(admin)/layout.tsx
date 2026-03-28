@@ -14,7 +14,7 @@ import { usePathname } from 'next/navigation'
 import AdminGuard from '@/guards/AdminGuard'
 import StaffGuard from '@/guards/StaffGuard'
 import AdminShell from '@/portal/admin/components/AdminShell'
-import { MODULE_ROUTE_MAP, DEFAULT_ALL_PERMISSIONS } from '@/constants/permissions'
+import { MODULE_ROUTE_MAP, DEFAULT_DEV_VIEW_PERMISSIONS } from '@/constants/permissions'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { setPermissions } from '@/store/slices/permissionSlice'
 import { usePermission } from '@/hooks/usePermission'
@@ -28,7 +28,7 @@ export default function AdminLayout({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!bypassAdminAuth) return
     if (permissionsLoaded) return
-    dispatch(setPermissions({ roleId: 'dev', roleName: 'Developer', permissions: DEFAULT_ALL_PERMISSIONS }))
+    dispatch(setPermissions({ roleId: 'dev', roleName: 'Developer', permissions: DEFAULT_DEV_VIEW_PERMISSIONS }))
   }, [bypassAdminAuth, dispatch, permissionsLoaded])
 
   const matchedModule = useMemo(() => {

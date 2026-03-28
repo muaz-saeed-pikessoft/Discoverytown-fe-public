@@ -1,0 +1,2 @@
+export { useMergeContacts } from './useClientMutations'
+
