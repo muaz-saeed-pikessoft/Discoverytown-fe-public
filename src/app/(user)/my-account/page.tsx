@@ -47,7 +47,7 @@ export default async function MyAccountPage() {
       actions={
         <>
           <Link
-            href={ROUTES.USER.ACTIVITIES}
+            href={`${ROUTES.USER.PLAY}#browse-sessions`}
             className='rounded-[999px] border border-[var(--dt-border)] bg-white px-4 py-2.5 text-[14px] font-bold text-[var(--dt-text-body)] no-underline transition-all hover:border-[var(--dt-primary)] hover:text-[var(--dt-primary)]'
           >
             Browse activities

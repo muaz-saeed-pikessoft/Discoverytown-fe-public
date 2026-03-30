@@ -1,10 +1,12 @@
 'use client'
 
 import { useMemo } from 'react'
+import Link from 'next/link'
 
 import DataTable from '@/components/shared/DataTable'
 import type { TableColumn } from '@/types/common'
 import BookingStatusBadge from '@/portal/admin/features/scheduling/components/BookingStatusBadge'
+import { ROUTES } from '@/constants/routes'
 import type { Booking } from '@/portal/admin/features/scheduling/types'
 
 interface RosterTableProps {
@@ -21,9 +23,12 @@ export default function RosterTable({ bookings, onCheckIn }: RosterTableProps) {
         label: 'Contact',
         render: (_v, row) => (
           <div className='min-w-0'>
-            <div className='font-black text-gray-900'>
+            <Link
+              href={ROUTES.ADMIN.CLIENT(row.contact.id)}
+              className='font-black text-gray-900 hover:underline'
+            >
               {row.contact.firstName} {row.contact.lastName}
-            </div>
+            </Link>
             <div className='text-xs font-semibold text-gray-500'>{row.contact.id}</div>
           </div>
         ),

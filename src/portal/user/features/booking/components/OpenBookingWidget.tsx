@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
+import LoadingSkeleton from '@/components/shared/LoadingSkeleton'
 import MiniCalendar from '@/modules/booking/components/MiniCalendar'
 import type { PublicService } from '@/types/scheduling.shared'
 import { ROUTES } from '@/constants/routes'
@@ -74,7 +75,7 @@ export default function OpenBookingWidget({ service }: OpenBookingWidgetProps) {
     <div className='rounded-[22px] border border-[var(--dt-border)] bg-white p-4'>
       {step === 'date' ? (
         <div className='space-y-3'>
-          <div className='text-[11px] font-black uppercase tracking-[0.22em] text-[var(--dt-text-subtle)]'>Select a date</div>
+          <div className='dt-sub-label'>Select a date</div>
           <MiniCalendar
             selected={selectedDate}
             onSelect={date => {
@@ -83,7 +84,7 @@ export default function OpenBookingWidget({ service }: OpenBookingWidgetProps) {
               setSelectedEndAt(null)
               setStep('time')
             }}
-            accentHex='#1d7fe5'
+            accentHex='var(--dt-primary)'
           />
         </div>
       ) : null}
@@ -92,7 +93,7 @@ export default function OpenBookingWidget({ service }: OpenBookingWidgetProps) {
         <div className='space-y-3'>
           <div className='flex items-center justify-between gap-2'>
             <div>
-              <div className='text-[11px] font-black uppercase tracking-[0.22em] text-[var(--dt-text-subtle)]'>Choose a start time</div>
+              <div className='dt-sub-label'>Choose a start time</div>
               <div className='mt-1 text-sm font-black text-[var(--dt-navy)]'>{selectedDate}</div>
             </div>
             <button
@@ -106,12 +107,9 @@ export default function OpenBookingWidget({ service }: OpenBookingWidgetProps) {
 
           <div className='grid grid-cols-2 gap-2'>
             {availability.isLoading ? (
-              <>
-                <div className='h-12 animate-pulse rounded-[12px] bg-black/5' />
-                <div className='h-12 animate-pulse rounded-[12px] bg-black/5' />
-                <div className='h-12 animate-pulse rounded-[12px] bg-black/5' />
-                <div className='h-12 animate-pulse rounded-[12px] bg-black/5' />
-              </>
+              <div className='col-span-2'>
+                <LoadingSkeleton variant='card' />
+              </div>
             ) : availability.data?.windows?.length ? (
               availability.data.windows.map(w => {
                 const selected = selectedStartAt === w.startAt
@@ -130,12 +128,11 @@ export default function OpenBookingWidget({ service }: OpenBookingWidgetProps) {
                       if (showDurationStep) setStep('duration')
                       else setStep('confirm')
                     }}
-                    className='cursor-pointer rounded-[12px] border-[1.5px] py-3 text-center text-[13px] font-bold transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-50'
-                    style={{
-                      background: selected ? '#1d7fe5' : 'white',
-                      borderColor: selected ? '#1d7fe5' : 'var(--dt-border)',
-                      color: selected ? '#fff' : 'var(--dt-text-muted)',
-                    }}
+                    className={[
+                      'cursor-pointer rounded-[12px] border-[1.5px] py-3 text-center text-[13px] font-bold transition-all duration-150 disabled:cursor-not-allowed disabled:opacity-50',
+                      selected ? 'bg-[var(--dt-primary)] text-white' : 'bg-white text-[var(--dt-text-muted)]',
+                    ].join(' ')}
+                    style={{ borderColor: selected ? 'var(--dt-primary)' : 'var(--dt-border)' }}
                   >
                     <div>{formatTimeLabel(w.startAt)}</div>
                     {limited ? <div className='mt-0.5 text-[10px] font-black'>Limited</div> : null}
@@ -154,7 +151,7 @@ export default function OpenBookingWidget({ service }: OpenBookingWidgetProps) {
       {step === 'duration' ? (
         <div className='space-y-3'>
           <div className='flex items-center justify-between gap-2'>
-            <div className='text-[11px] font-black uppercase tracking-[0.22em] text-[var(--dt-text-subtle)]'>How long do you need?</div>
+            <div className='dt-sub-label'>How long do you need?</div>
             <button
               type='button'
               onClick={() => setStep('time')}
@@ -180,12 +177,11 @@ export default function OpenBookingWidget({ service }: OpenBookingWidgetProps) {
                     if (selectedStartAt) setSelectedEndAt(new Date(new Date(selectedStartAt).getTime() + m * 60_000).toISOString())
                     setStep('confirm')
                   }}
-                  className='cursor-pointer rounded-[12px] border-[1.5px] px-3 py-3 text-left text-[13px] font-bold transition-all duration-150'
-                  style={{
-                    background: selected ? '#1d7fe5' : 'white',
-                    borderColor: selected ? '#1d7fe5' : 'var(--dt-border)',
-                    color: selected ? '#fff' : 'var(--dt-text-muted)',
-                  }}
+                  className={[
+                    'cursor-pointer rounded-[12px] border-[1.5px] px-3 py-3 text-left text-[13px] font-bold transition-all duration-150',
+                    selected ? 'bg-[var(--dt-primary)] text-white' : 'bg-white text-[var(--dt-text-muted)]',
+                  ].join(' ')}
+                  style={{ borderColor: selected ? 'var(--dt-primary)' : 'var(--dt-border)' }}
                 >
                   <div className='font-black'>{formatDurationLabel(m)}</div>
                   <div className='mt-0.5 text-[11px] font-black opacity-80'>${previewPrice}</div>
@@ -196,7 +192,7 @@ export default function OpenBookingWidget({ service }: OpenBookingWidgetProps) {
 
           {pricingModel === 'per_person' ? (
             <div className='rounded-[14px] border border-[var(--dt-border)] bg-[var(--dt-bg-page)] p-3'>
-              <div className='text-[11px] font-black uppercase tracking-[0.22em] text-[var(--dt-text-subtle)]'>Guests</div>
+              <div className='dt-sub-label'>Guests</div>
               <div className='mt-2 flex items-center gap-2'>
                 <button
                   type='button'
@@ -222,7 +218,7 @@ export default function OpenBookingWidget({ service }: OpenBookingWidgetProps) {
       {step === 'confirm' ? (
         <div className='space-y-3'>
           <div className='flex items-center justify-between gap-2'>
-            <div className='text-[11px] font-black uppercase tracking-[0.22em] text-[var(--dt-text-subtle)]'>Review</div>
+            <div className='dt-sub-label'>Review</div>
             <button
               type='button'
               onClick={() => setStep(showDurationStep ? 'duration' : 'time')}

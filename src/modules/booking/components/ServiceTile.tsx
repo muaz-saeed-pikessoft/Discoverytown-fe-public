@@ -1,5 +1,4 @@
-import type { ServiceTileProps } from './types'
-import type { BookingService } from './types'
+import type { BookingService, ServiceTileProps } from './types'
 
 export default function ServiceTile({ service, selected, delay = 0, onClick }: ServiceTileProps) {
   return (

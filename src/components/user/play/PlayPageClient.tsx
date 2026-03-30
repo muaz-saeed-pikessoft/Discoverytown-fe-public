@@ -10,6 +10,7 @@ import Section from '@/components/shared/Section'
 import SectionHeader from '@/components/shared/SectionHeader'
 import SectionNav from '@/components/shared/SectionNav'
 import SubLabel from '@/components/shared/SubLabel'
+import BrowseSessionsSection from './BrowseSessionsSection'
 import CampCard from './CampCard'
 import FestivalCard from './FestivalCard'
 import FieldTrips from './FieldTrips'
@@ -119,8 +120,8 @@ export default function PlayPageClient() {
                   description: 'Choose open play, camps, PNO, group visits, or mobile play directly from this page.',
                 },
                 {
-                  title: 'Choose a package',
-                  description: 'Each card routes into the shared booking flow with the service and option prefilled.',
+                  title: 'Browse sessions',
+                  description: 'See scheduled sessions and open-ended booking options, then pick what works for your family.',
                 },
                 {
                   title: 'Reserve your spot',
@@ -128,6 +129,16 @@ export default function PlayPageClient() {
                 },
               ]}
             />
+
+            <Section id='browse-sessions'>
+              <SectionHeader
+                eyebrow='Browse & Book'
+                title='Available Sessions'
+                desc='Browse scheduled sessions and open-ended booking options, then book in a few clicks.'
+                accentColor='var(--dt-primary)'
+              />
+              <BrowseSessionsSection />
+            </Section>
 
             <Section id='open-play'>
               <SectionHeader

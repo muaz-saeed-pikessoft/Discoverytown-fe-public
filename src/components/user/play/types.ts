@@ -1,4 +1,5 @@
 export type SectionId =
+  | 'browse-sessions'
   | 'open-play'
   | 'private-play'
   | 'special-events'

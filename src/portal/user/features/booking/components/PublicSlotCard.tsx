@@ -1,12 +1,12 @@
 'use client'
 
-import Image from 'next/image'
 import Link from 'next/link'
 
 import { ROUTES } from '@/constants/routes'
 import type { Location, PublicService, PublicServiceSlot } from '@/types/scheduling.shared'
 import AvailabilityBadge from '@/portal/user/features/booking/components/AvailabilityBadge'
 import { serviceTypeToParam } from '@/portal/user/features/booking/components/utils'
+import { ServiceType } from '@/types/scheduling.shared'
 
 type PublicSlotCardProps =
   | { mode: 'scheduled'; slot: PublicServiceSlot }
@@ -31,35 +31,58 @@ export default function PublicSlotCard(props: PublicSlotCardProps) {
     try {
       const parsed = new URL(url)
       if (parsed.protocol !== 'http:' && parsed.protocol !== 'https:') return null
+
+      if (parsed.hostname === 'unsplash.com') {
+        const parts = parsed.pathname.split('/').filter(Boolean)
+        if (parts[0] === 'photos' && parts.length >= 2) {
+          const last = parts[parts.length - 1]
+          const id = last.split('-').at(-1)
+          if (id && id.length >= 6) {
+            return `https://source.unsplash.com/${id}/1600x1200`
+          }
+        }
+      }
+
       return url
     } catch {
       return null
     }
   })()
 
-  const placeholder =
-    "data:image/svg+xml;utf8," +
-    encodeURIComponent(
-      `<svg xmlns="http://www.w3.org/2000/svg" width="800" height="600"><rect width="100%" height="100%" fill="#e5e7eb"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="#6b7280" font-family="Arial" font-size="28">${service.name}</text></svg>`,
-    )
+  const fallbackImageUrl = (() => {
+    if (service.serviceType === ServiceType.OPEN_PLAY) {
+      return '/images/stock/session-open-play.svg'
+    }
+    if (service.serviceType === ServiceType.GYM_CLASS || service.serviceType === ServiceType.FITNESS_ASSESSMENT) {
+      return '/images/stock/session-gym.svg'
+    }
+    if (service.serviceType === ServiceType.WORKSHOP || service.serviceType === ServiceType.CAMP) {
+      return '/images/stock/session-general.svg'
+    }
+    if (service.serviceType === ServiceType.SWIM_CLASS) {
+      return '/images/stock/session-general.svg'
+    }
+    if (service.serviceType === ServiceType.PARTY_PACKAGE || service.serviceType === ServiceType.PRIVATE_HIRE) {
+      return '/images/stock/private-hire-venue.svg'
+    }
+    return '/images/stock/session-general.svg'
+  })()
 
   return (
     <Link
       href={href}
-      className='group block overflow-hidden rounded-[26px] border border-black/[0.06] bg-white/90 backdrop-blur-sm shadow-[0_18px_55px_rgba(20,35,59,0.08)] transition hover:-translate-y-0.5 hover:shadow-[0_26px_80px_rgba(20,35,59,0.12)]'
+      className='dt-card-interactive group block overflow-hidden rounded-[20px]'
     >
       <div className='relative aspect-[4/3] w-full bg-[var(--dt-bg-page)]'>
-        <Image
-          src={imageUrl ?? placeholder}
+        <img
+          src={imageUrl ?? fallbackImageUrl}
           alt={service.name}
-          fill
-          sizes='(min-width: 1024px) 25vw, (min-width: 640px) 50vw, 100vw'
           loading='lazy'
-          className='object-cover transition duration-300 group-hover:scale-[1.03]'
+          className='absolute inset-0 h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]'
         />
         <div className='absolute inset-0 bg-[linear-gradient(180deg,rgba(20,35,59,0.05)_0%,rgba(20,35,59,0.55)_100%)]' />
         <div className='absolute left-4 top-4'>
-          <div className='inline-flex items-center rounded-[999px] bg-white/90 px-3 py-1 text-[11px] font-black tracking-[0.12em] text-[var(--dt-navy)] shadow-sm'>
+          <div className='dt-pill-accent bg-white/90 text-[var(--dt-navy)] shadow-sm'>
             {service.serviceType.replaceAll('_', ' ')}
           </div>
         </div>
@@ -96,7 +119,13 @@ export default function PublicSlotCard(props: PublicSlotCardProps) {
           {props.mode === 'scheduled' ? (
             <AvailabilityBadge availableSpots={props.slot.availableSpots} status={props.slot.status} capacity={props.slot.effectiveCapacity} />
           ) : (
-            <div className='inline-flex items-center rounded-[999px] bg-emerald-50 px-3 py-1 text-[11px] font-black text-emerald-700'>
+            <div
+              className='dt-pill-accent'
+              style={{
+                ['--dt-pill-bg' as string]: 'var(--dt-teal-light)',
+                ['--dt-pill-color' as string]: 'var(--dt-teal-dark)',
+              }}
+            >
               Book now
             </div>
           )}

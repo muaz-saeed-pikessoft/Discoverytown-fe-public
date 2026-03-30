@@ -2,17 +2,15 @@
 
 import { useMemo, useState } from 'react'
 
-import PageHeader from '@/components/shared/PageHeader'
-import LoadingSkeleton from '@/components/shared/LoadingSkeleton'
 import ErrorState from '@/components/shared/ErrorState'
 import EmptyState from '@/components/shared/EmptyState'
-import DataTable from '@/components/shared/DataTable'
 import type { TableColumn } from '@/types/common'
 import { useAddOns } from '@/portal/admin/features/scheduling/hooks/useAddOns'
 import type { AddOn } from '@/portal/admin/features/scheduling/types'
 import AddOnFormSlideOver from '@/portal/admin/features/scheduling/components/AddOnFormSlideOver'
 import ConfirmDialog from '@/components/shared/ConfirmDialog'
 import { useCreateAddOn, useDeleteAddOn, useUpdateAddOn } from '@/portal/admin/features/scheduling/hooks/useAddOnsMutations'
+import AdminTablePage from '@/portal/admin/components/AdminTablePage'
 
 export default function SchedulingAddOnsPage() {
   const addOnsQuery = useAddOns()
@@ -20,17 +18,10 @@ export default function SchedulingAddOnsPage() {
   const [editing, setEditing] = useState<AddOn | null>(null)
   const updateAddOn = useUpdateAddOn(editing?.id ?? '')
   const deleteAddOn = useDeleteAddOn()
-  const [query, setQuery] = useState('')
   const [formOpen, setFormOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<AddOn | null>(null)
 
   const addOns = addOnsQuery.data ?? []
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase()
-    if (!q) return addOns
-    return addOns.filter(a => a.name.toLowerCase().includes(q))
-  }, [addOns, query])
 
   const columns = useMemo<TableColumn<AddOn>[]>(
     () => [
@@ -73,12 +64,21 @@ export default function SchedulingAddOnsPage() {
     []
   )
 
+  if (addOnsQuery.isError) {
+    return <ErrorState title='Failed to load add-ons' onRetry={() => void addOnsQuery.refetch()} />
+  }
+
   return (
     <div className='space-y-4'>
-      <PageHeader
+      {addOns.length === 0 && !addOnsQuery.isLoading ? (
+        <EmptyState title='No add-ons' description='Create add-ons to upsell or bundle experiences.' />
+      ) : null}
+
+      <AdminTablePage<AddOn>
         title='Add-ons'
         subtitle='Manage optional add-ons for bookings.'
-        actions={
+        module='scheduling'
+        createAction={
           <button
             type='button'
             onClick={() => {
@@ -90,26 +90,12 @@ export default function SchedulingAddOnsPage() {
             New add-on
           </button>
         }
+        data={addOns}
+        columns={columns}
+        searchableKeys={['name']}
+        pageSize={12}
+        isLoading={addOnsQuery.isLoading}
       />
-
-      <div className='rounded-2xl border border-gray-200 bg-white p-4'>
-        <input
-          value={query}
-          onChange={e => setQuery(e.target.value)}
-          placeholder='Search add-ons…'
-          className='h-11 w-full rounded-xl border border-gray-200 bg-white px-4 text-sm font-semibold text-gray-900'
-        />
-      </div>
-
-      {addOnsQuery.isLoading ? (
-        <LoadingSkeleton variant='table' />
-      ) : addOnsQuery.isError ? (
-        <ErrorState title='Failed to load add-ons' onRetry={() => void addOnsQuery.refetch()} />
-      ) : addOns.length === 0 ? (
-        <EmptyState title='No add-ons' description='Create add-ons to upsell or bundle experiences.' />
-      ) : (
-        <DataTable data={filtered} columns={columns} keyExtractor={a => a.id} pageSize={12} />
-      )}
 
       <AddOnFormSlideOver
         open={formOpen}

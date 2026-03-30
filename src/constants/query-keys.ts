@@ -25,6 +25,13 @@ export const QUERY_KEYS = {
       STAFF_AVAILABILITY: (staffId: string, startAt: string, endAt: string) =>
         ['admin', 'scheduling', 'staff-availability', staffId, startAt, endAt] as const,
     },
+    CALENDAR: {
+      AVAILABILITY_GRID: (locationId: string, from: string, to: string) =>
+        ['admin', 'calendar', 'availability-grid', locationId, from, to] as const,
+      PRIVATE_HIRE_REQUESTS: (filters?: object) => ['admin', 'calendar', 'private-hire', filters] as const,
+      CONFLICTS: (locationId: string, startAt: string, endAt: string, excludeSlotId?: string) =>
+        ['admin', 'calendar', 'conflicts', locationId, startAt, endAt, excludeSlotId ?? ''] as const,
+    },
     CLIENTS: {
       FAMILIES: (filters?: object) => ['admin', 'families', filters] as const,
       FAMILY: (id: string) => ['admin', 'families', id] as const,
@@ -91,6 +98,8 @@ export const QUERY_KEYS = {
       MY_BOOKINGS: (filters?: object) => ['user', 'my-bookings', filters] as const,
       MY_BOOKING: (id: string) => ['user', 'my-bookings', id] as const,
       MY_UPCOMING: ['user', 'upcoming'] as const,
+      PRIVATE_HIRE_AVAILABILITY: (locationId: string, from: string, to: string) =>
+        ['user', 'private-hire', 'availability', locationId, from, to] as const,
     },
   },
 } as const

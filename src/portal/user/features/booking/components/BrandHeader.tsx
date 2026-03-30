@@ -32,7 +32,7 @@ export default function BrandHeader({ name, logoUrl, className }: BrandHeaderPro
         </Link>
 
         <Link
-          href={ROUTES.USER.ACTIVITIES}
+          href={`${ROUTES.USER.PLAY}#browse-sessions`}
           className='dt-btn-primary px-4 py-2'
         >
           Browse

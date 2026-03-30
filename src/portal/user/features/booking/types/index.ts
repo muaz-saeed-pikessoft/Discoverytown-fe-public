@@ -51,11 +51,14 @@ export interface ConsumerCreateOpenBookingInput {
   acceptedWaiver?: boolean
 }
 
+export type PrivateHireEventType = 'BIRTHDAY' | 'CORPORATE' | 'OTHER'
+
 export interface PrivateHireInquiryInput {
   firstName: string
   lastName: string
   email: string
   phone: string
+  eventType?: PrivateHireEventType
   preferredDate: string
   alternateDate?: string
   guestCount: number

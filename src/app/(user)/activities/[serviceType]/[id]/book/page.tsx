@@ -5,7 +5,6 @@ import { notFound } from 'next/navigation'
 
 import ENV from '@/config/env'
 import { ROUTES } from '@/constants/routes'
-import BrandHeader from '@/portal/user/features/booking/components/BrandHeader'
 import type { PublicService, ServiceType } from '@/types/scheduling.shared'
 import { ServiceType as ServiceTypeEnum } from '@/types/scheduling.shared'
 import { getServerApiBaseUrl } from '@/lib/api/server-base-url'
@@ -69,14 +68,24 @@ export default async function ActivityOpenBookingPage({
   })()
 
   return (
-    <div className='min-h-[calc(100vh-74px)] bg-[linear-gradient(135deg,#EEF4FF_0%,#FFF6EE_100%)] dt-font-body'>
+    <div className='dt-font-body bg-[var(--dt-bg-page)] min-h-screen'>
       <div className='dt-container py-8'>
-        <div className='space-y-6'>
-          <BrandHeader name='DiscoveryTown' />
+        <div className='step-panel space-y-6'>
+          <nav className='dt-sub-label text-[var(--dt-text-muted)]' aria-label='Breadcrumb'>
+            <Link href={ROUTES.USER.HOME} className='hover:underline'>
+              Home
+            </Link>
+            <span className='mx-2 opacity-60'>/</span>
+            <Link href={`${ROUTES.USER.PLAY}#browse-sessions`} className='hover:underline'>
+              Browse sessions
+            </Link>
+            <span className='mx-2 opacity-60'>/</span>
+            <span className='text-[var(--dt-navy)]'>{service.name}</span>
+          </nav>
 
           <div className='grid gap-6 lg:grid-cols-[1.55fr_1fr]'>
             <div className='space-y-5'>
-              <div className='overflow-hidden rounded-[28px] border border-black/[0.06] bg-white/90 backdrop-blur-sm shadow-[0_20px_60px_rgba(20,35,59,0.08)]'>
+              <div className='dt-surface overflow-hidden rounded-[28px] border border-[var(--dt-border)]'>
                 <div className='relative aspect-[16/7] w-full bg-[var(--dt-bg-page)]'>
                   {imageUrl ? (
                     <Image
@@ -90,12 +99,10 @@ export default async function ActivityOpenBookingPage({
                   ) : null}
                   <div className='absolute inset-0 bg-[linear-gradient(180deg,rgba(20,35,59,0.05)_0%,rgba(20,35,59,0.7)_100%)]' />
                   <div className='absolute left-6 top-6 flex flex-wrap items-center gap-2'>
-                    <span className='rounded-[999px] bg-white/90 px-3 py-1 text-[11px] font-black tracking-[0.12em] text-[var(--dt-navy)]'>
+                    <span className='dt-pill-accent bg-white/90 text-[var(--dt-navy)] shadow-sm'>
                       {service.serviceType.replaceAll('_', ' ')}
                     </span>
-                    <span className='rounded-[999px] bg-white/90 px-3 py-1 text-[11px] font-black tracking-[0.12em] text-[var(--dt-navy)]'>
-                      Open booking
-                    </span>
+                    <span className='dt-pill-accent bg-white/90 text-[var(--dt-navy)] shadow-sm'>Open booking</span>
                   </div>
                   <div className='absolute bottom-6 left-6 right-6'>
                     <h1 className='text-3xl font-black tracking-[-0.02em] text-white dt-font-heading'>{service.name}</h1>
@@ -114,17 +121,17 @@ export default async function ActivityOpenBookingPage({
 
                   <div className='mt-5 flex flex-wrap items-center gap-3'>
                     <div className='rounded-[16px] bg-[var(--dt-bg-page)] px-4 py-3'>
-                      <div className='text-[11px] font-black uppercase tracking-[0.22em] text-[var(--dt-text-subtle)]'>From</div>
+                      <div className='dt-sub-label'>From</div>
                       <div className='mt-1 text-base font-black text-[var(--dt-navy)]'>${service.basePrice}</div>
                     </div>
                   </div>
 
                   <div className='mt-6'>
                     <Link
-                      href={ROUTES.USER.ACTIVITIES}
+                      href={`${ROUTES.USER.PLAY}#browse-sessions`}
                       className='inline-flex items-center gap-2 text-sm font-black text-[var(--dt-primary)] hover:underline'
                     >
-                      ← Browse all activities
+                      ← Back to browse sessions
                     </Link>
                   </div>
                 </div>
@@ -132,8 +139,8 @@ export default async function ActivityOpenBookingPage({
             </div>
 
             <div className='lg:sticky lg:top-6 h-fit'>
-              <div className='rounded-[28px] border border-black/[0.06] bg-white/90 p-5 backdrop-blur-sm shadow-[0_20px_60px_rgba(20,35,59,0.08)]'>
-                <div className='text-[11px] font-black uppercase tracking-[0.22em] text-[var(--dt-text-subtle)]'>Ready to book?</div>
+              <div className='dt-surface rounded-[28px] border border-[var(--dt-border)] p-5'>
+                <div className='dt-sub-label'>Ready to book?</div>
                 <div className='mt-1 text-lg font-black text-[var(--dt-navy)] dt-font-heading'>Choose your time</div>
                 <div className='mt-4'>
                   <OpenBookingWidget service={service} />

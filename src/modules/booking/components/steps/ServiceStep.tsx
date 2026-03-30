@@ -1,9 +1,15 @@
+import { useRouter } from 'next/navigation'
+
+import { ROUTES } from '@/constants/routes'
+
 import BookingStepHeader from '../BookingStepHeader'
 import ServiceTile from '../ServiceTile'
 import type { BookingServiceStepProps } from '../types'
 import { BookingStepIndex } from '../types'
 
 export default function ServiceStep({ booking, services, update, setStep }: BookingServiceStepProps) {
+  const router = useRouter()
+
   return (
     <div className='step-panel dt-surface rounded-[28px] p-6 lg:p-8'>
       <BookingStepHeader
@@ -19,6 +25,11 @@ export default function ServiceStep({ booking, services, update, setStep }: Book
             selected={booking.service === service.id}
             delay={index * 50}
             onClick={() => {
+              if (service.id === 'private-play') {
+                router.push(ROUTES.USER.PRIVATE_HIRE)
+                return
+              }
+
               update({ service: service.id, option: null, addons: [] })
               setStep(BookingStepIndex.Package)
             }}

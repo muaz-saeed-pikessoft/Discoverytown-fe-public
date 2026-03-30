@@ -7,50 +7,21 @@ import ErrorState from '@/components/shared/ErrorState'
 import PageHeader from '@/components/shared/PageHeader'
 import { useLocations } from '@/portal/admin/features/scheduling/hooks/useLocations'
 import { useCalendarSlots } from '@/portal/admin/features/scheduling/hooks/useCalendarSlots'
+import CalendarToolbar from '@/portal/admin/features/scheduling/components/CalendarToolbar'
 import CalendarGrid from '@/portal/admin/features/scheduling/components/CalendarGrid'
 import SlotPopover from '@/portal/admin/features/scheduling/components/SlotPopover'
 import QuickCreateModal from '@/portal/admin/features/scheduling/components/QuickCreateModal'
 import EventTypeColorLegend from '@/portal/admin/features/scheduling/components/EventTypeColorLegend'
 import { useServices } from '@/portal/admin/features/scheduling/hooks/useServices'
+import { SERVICE_TYPE_CONFIG } from '@/portal/admin/features/scheduling/constants'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { setCalendarDate, setCalendarView, setSelectedLocationId } from '@/store/slices/schedulingSlice'
 import type { CalendarView } from '@/portal/admin/features/scheduling/constants'
 import type { ServiceSlot } from '@/portal/admin/features/scheduling/types'
+import type { ServiceType } from '@/types/scheduling.shared'
+import { addDays, rangeForView, startOfWeekMonday } from '@/portal/admin/features/scheduling/utils/calendar-date-utils'
 
-function startOfDay(d: Date): Date {
-  return new Date(d.getFullYear(), d.getMonth(), d.getDate())
-}
-
-function addDays(d: Date, n: number): Date {
-  const next = new Date(d)
-  next.setDate(next.getDate() + n)
-  return next
-}
-
-function startOfWeekMonday(anchor: Date): Date {
-  const d = startOfDay(anchor)
-  const weekdayMon0 = (d.getDay() + 6) % 7
-  return addDays(d, -weekdayMon0)
-}
-
-function rangeForView(view: CalendarView, anchor: Date): { from: string; to: string } {
-  if (view === 'day') {
-    const start = startOfDay(anchor)
-    const end = addDays(start, 1)
-    return { from: start.toISOString(), to: end.toISOString() }
-  }
-
-  if (view === 'week') {
-    const start = startOfWeekMonday(anchor)
-    const end = addDays(start, 7)
-    return { from: start.toISOString(), to: end.toISOString() }
-  }
-
-  // month + agenda
-  const start = new Date(anchor.getFullYear(), anchor.getMonth(), 1)
-  const end = new Date(anchor.getFullYear(), anchor.getMonth() + 1, 0)
-  return { from: start.toISOString(), to: end.toISOString() }
-}
+const ALL_SERVICE_TYPES = Object.keys(SERVICE_TYPE_CONFIG) as ServiceType[]
 
 export default function AdminSchedulingCalendarPage() {
   const dispatch = useAppDispatch()
@@ -61,121 +32,111 @@ export default function AdminSchedulingCalendarPage() {
   const anchorDate = useMemo(() => new Date(calendarDate), [calendarDate])
   const range = useMemo(() => rangeForView(calendarView, anchorDate), [calendarView, anchorDate])
 
+  const [staffId, setStaffId] = useState<string | null>(null)
+  /** `null` = all service types visible */
+  const [includedServiceTypes, setIncludedServiceTypes] = useState<ServiceType[] | null>(null)
+
   const locationsQuery = useLocations()
   const servicesQuery = useServices({})
-  const calendarQuery = useCalendarSlots(selectedLocationId, range)
+  const calendarQuery = useCalendarSlots(selectedLocationId, range, staffId)
 
   const [activeSlot, setActiveSlot] = useState<ServiceSlot | null>(null)
   const [quickCreateOpen, setQuickCreateOpen] = useState(false)
   const [quickCreateDate, setQuickCreateDate] = useState<Date>(new Date())
   const [quickCreateTime, setQuickCreateTime] = useState<string>('10:00')
 
-  const slots = calendarQuery.data ?? []
+  const rawSlots = useMemo(() => calendarQuery.data ?? [], [calendarQuery.data])
+
+  const slots = useMemo(() => {
+    if (includedServiceTypes === null) return rawSlots
+    if (includedServiceTypes.length === 0) return []
+    const set = new Set(includedServiceTypes)
+    return rawSlots.filter(s => set.has(s.service.serviceType))
+  }, [rawSlots, includedServiceTypes])
+
+  const staffOptions = useMemo(() => {
+    const map = new Map<string, string>()
+    for (const s of rawSlots) {
+      if (s.staffId && s.staff) {
+        map.set(s.staffId, `${s.staff.firstName} ${s.staff.lastName}`)
+      }
+    }
+    return Array.from(map.entries())
+      .sort((a, b) => a[1].localeCompare(b[1]))
+      .map(([id, label]) => ({ id, label }))
+  }, [rawSlots])
+
   const locations = locationsQuery.data ?? []
 
+  function toggleServiceType(st: ServiceType) {
+    setIncludedServiceTypes(prev => {
+      if (prev === null) {
+        const next = ALL_SERVICE_TYPES.filter(t => t !== st)
+        return next.length === 0 ? [] : next
+      }
+      if (prev.includes(st)) {
+        return prev.filter(t => t !== st)
+      }
+      const next = [...prev, st]
+      return next.length === ALL_SERVICE_TYPES.length ? null : next
+    })
+  }
+
+  const dateLabel =
+    calendarView === 'week'
+      ? `${startOfWeekMonday(anchorDate).toLocaleDateString(undefined, {
+          month: 'short',
+          day: 'numeric',
+        })} – ${addDays(startOfWeekMonday(anchorDate), 6).toLocaleDateString(undefined, {
+          month: 'short',
+          day: 'numeric',
+        })}`
+      : calendarView === 'day'
+        ? anchorDate.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })
+        : anchorDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })
+
   return (
-    <div className='space-y-4'>
+    <div className='space-y-4 print:space-y-2'>
       <PageHeader
         title='Calendar'
-        subtitle='View schedules across locations.'
-        actions={
-          <div className='flex flex-wrap items-center gap-2'>
-            <button
-              type='button'
-              onClick={() => void calendarQuery.refetch()}
-              className='h-10 rounded-xl border border-gray-200 bg-white px-4 text-xs font-black text-gray-700 transition hover:bg-gray-50'
-            >
-              Refresh
-            </button>
-            <button
-              type='button'
-              onClick={() => dispatch(setCalendarDate(new Date().toISOString().slice(0, 10)))}
-              className='h-10 rounded-xl border border-gray-200 bg-white px-4 text-xs font-black text-gray-700 transition hover:bg-gray-50'
-            >
-              Today
-            </button>
-          </div>
-        }
+        subtitle='Unified schedule view — filter by service type and instructor.'
       />
 
-      <div className='flex flex-col gap-3 rounded-2xl border border-gray-200 bg-white p-4 sm:flex-row sm:items-center sm:justify-between'>
-        <div className='flex flex-wrap items-center gap-2'>
-          <select
-            value={selectedLocationId ?? ''}
-            onChange={e => dispatch(setSelectedLocationId(e.target.value || null))}
-            className='h-10 rounded-xl border border-gray-200 bg-white px-3 text-sm font-semibold text-gray-900'
-          >
-            <option value=''>All locations</option>
-            {locations.map(l => (
-              <option key={l.id} value={l.id}>
-                {l.name}
-              </option>
-            ))}
-          </select>
-
-          <div className='flex items-center gap-2 rounded-xl border border-gray-200 bg-white p-1'>
-            {(['month', 'week', 'day', 'agenda'] as CalendarView[]).map(v => (
-              <button
-                key={v}
-                type='button'
-                onClick={() => dispatch(setCalendarView(v))}
-                className={[
-                  'h-9 rounded-lg px-3 text-xs font-black uppercase tracking-widest transition',
-                  calendarView === v ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-50',
-                ].join(' ')}
-              >
-                {v}
-              </button>
-            ))}
-          </div>
-        </div>
-
-        <div className='flex items-center gap-2'>
-          <button
-            type='button'
-            onClick={() => {
-              const next =
-                calendarView === 'day'
-                  ? addDays(anchorDate, -1)
-                  : calendarView === 'week'
-                    ? addDays(anchorDate, -7)
-                    : new Date(anchorDate.getFullYear(), anchorDate.getMonth() - 1, 1)
-              dispatch(setCalendarDate(next.toISOString().slice(0, 10)))
-            }}
-            className='h-10 rounded-xl border border-gray-200 bg-white px-4 text-xs font-black text-gray-700 transition hover:bg-gray-50'
-          >
-            Prev
-          </button>
-          <div className='text-sm font-black text-gray-900'>
-            {calendarView === 'week'
-              ? `${startOfWeekMonday(anchorDate).toLocaleDateString(undefined, {
-                  month: 'short',
-                  day: 'numeric',
-                })} – ${addDays(startOfWeekMonday(anchorDate), 6).toLocaleDateString(undefined, {
-                  month: 'short',
-                  day: 'numeric',
-                })}`
-              : calendarView === 'day'
-                ? anchorDate.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' })
-                : anchorDate.toLocaleDateString(undefined, { month: 'long', year: 'numeric' })}
-          </div>
-          <button
-            type='button'
-            onClick={() => {
-              const next =
-                calendarView === 'day'
-                  ? addDays(anchorDate, 1)
-                  : calendarView === 'week'
-                    ? addDays(anchorDate, 7)
-                    : new Date(anchorDate.getFullYear(), anchorDate.getMonth() + 1, 1)
-              dispatch(setCalendarDate(next.toISOString().slice(0, 10)))
-            }}
-            className='h-10 rounded-xl border border-gray-200 bg-white px-4 text-xs font-black text-gray-700 transition hover:bg-gray-50'
-          >
-            Next
-          </button>
-        </div>
-      </div>
+      <CalendarToolbar
+        locations={locations}
+        selectedLocationId={selectedLocationId}
+        onLocationChange={locId => dispatch(setSelectedLocationId(locId))}
+        staffId={staffId}
+        staffOptions={staffOptions}
+        onStaffChange={setStaffId}
+        calendarView={calendarView}
+        onViewChange={v => dispatch(setCalendarView(v))}
+        includedServiceTypes={includedServiceTypes}
+        onToggleServiceType={toggleServiceType}
+        onResetServiceTypes={() => setIncludedServiceTypes(null)}
+        dateLabel={dateLabel}
+        onPrev={() => {
+          const next =
+            calendarView === 'day'
+              ? addDays(anchorDate, -1)
+              : calendarView === 'week'
+                ? addDays(anchorDate, -7)
+                : new Date(anchorDate.getFullYear(), anchorDate.getMonth() - 1, 1)
+          dispatch(setCalendarDate(next.toISOString().slice(0, 10)))
+        }}
+        onNext={() => {
+          const next =
+            calendarView === 'day'
+              ? addDays(anchorDate, 1)
+              : calendarView === 'week'
+                ? addDays(anchorDate, 7)
+                : new Date(anchorDate.getFullYear(), anchorDate.getMonth() + 1, 1)
+          dispatch(setCalendarDate(next.toISOString().slice(0, 10)))
+        }}
+        onRefresh={() => void calendarQuery.refetch()}
+        onToday={() => dispatch(setCalendarDate(new Date().toISOString().slice(0, 10)))}
+        onPrint={() => window.print()}
+      />
 
       {calendarQuery.isLoading ? (
         <LoadingSkeleton variant='page' />

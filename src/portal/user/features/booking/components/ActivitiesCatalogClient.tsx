@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from 'react'
 
+import EmptyState from '@/components/shared/EmptyState'
 import ActivityFilters from '@/portal/user/features/booking/components/ActivityFilters'
 import PublicSlotCard from '@/portal/user/features/booking/components/PublicSlotCard'
 import type { PublicService, PublicServiceSlot } from '@/types/scheduling.shared'
@@ -26,10 +27,10 @@ export default function ActivitiesCatalogClient({ slots, services, locations }: 
 
   return (
     <div className='space-y-5'>
-      <div className='rounded-[26px] border border-black/[0.06] bg-white/90 p-5 shadow-[0_16px_50px_rgba(20,35,59,0.08)] backdrop-blur-sm'>
+      <div className='dt-surface rounded-[28px] border-[var(--dt-border)] p-5'>
         <div className='flex flex-col gap-3 md:flex-row md:items-center md:justify-between'>
           <div>
-            <div className='text-[11px] font-black uppercase tracking-[0.18em] text-[var(--dt-text-subtle)]'>Browse inventory</div>
+            <div className='dt-sub-label'>Browse inventory</div>
             <div className='mt-1 text-sm font-semibold text-[var(--dt-text-body)]/75'>
               {totalVisible} option{totalVisible === 1 ? '' : 's'} available
             </div>
@@ -86,10 +87,7 @@ export default function ActivitiesCatalogClient({ slots, services, locations }: 
       </div>
 
       {totalVisible === 0 ? (
-        <div className='rounded-[28px] border border-black/[0.06] bg-white/80 p-10 text-center backdrop-blur-sm shadow-[0_20px_60px_rgba(20,35,59,0.06)]'>
-          <div className='text-lg font-black text-[var(--dt-navy)]'>No sessions available</div>
-          <div className='mt-2 text-sm font-semibold text-[var(--dt-text-body)]/70'>Try another booking mode or check back soon.</div>
-        </div>
+        <EmptyState title='No sessions available' description='Try another booking mode or check back soon.' />
       ) : (
         <div className='grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
           {visibleOpenServices.map(service => {

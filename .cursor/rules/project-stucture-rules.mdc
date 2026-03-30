@@ -81,7 +81,7 @@ React Query hooks: camelCase, use      → useFamilies, useCreateBooking
 Redux selectors:   camelCase, select   → selectAuthUser, selectSidebarCollapsed
 Redux actions:     camelCase, verb     → setAuthUser, toggleSidebar
 API functions:     camelCase, verb     → getBookings, cancelBooking, createFamily
-Zod schemas:       camelCase, Schema   → createBookingSchema, loginSchema
+YUP schemas:       camelCase, Schema   → createBookingSchema, loginSchema
 Types:             PascalCase          → Family, StaffUser, BookingStatus
 Enums:             PascalCase name, SCREAMING values → BookingStatus.CONFIRMED
 Query key arrays:  from QUERY_KEYS constants only — never inline
@@ -176,7 +176,7 @@ Constants:         SCREAMING_SNAKE_CASE → MAX_FILE_SIZE_MB
 
 ---
 
-## FORMS (React Hook Form + Zod)
+## FORMS (React Hook Form + YUP)
 
   - Every form: useForm<z.infer<typeof schema>>({ resolver: zodResolver(schema) })
   - Schema in src/lib/validations/[portal]/[module].validations.ts — never inline in component

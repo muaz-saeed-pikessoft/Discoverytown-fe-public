@@ -47,16 +47,22 @@ export const cancelBookingSchema = yup.object({
   reason: yup.string().min(1, 'Please provide a reason').max(1000).required('Please provide a reason'),
 })
 
+const privateHireEventTypes = ['BIRTHDAY', 'CORPORATE', 'OTHER'] as const
+
 export const privateHireInquirySchema = yup.object({
   firstName: yup.string().min(1).max(100).required('First name is required'),
   lastName: yup.string().min(1).max(100).required('Last name is required'),
   email: yup.string().email('Invalid email').required('Email is required'),
   phone: yup.string().max(30).required('Phone is required'),
+  eventType: yup
+    .mixed<(typeof privateHireEventTypes)[number]>()
+    .oneOf([...privateHireEventTypes], 'Select an event type')
+    .required('Select an event type'),
   preferredDate: yup.string().required('Preferred date is required'),
   alternateDate: yup.string().optional(),
   guestCount: yup.number().integer().min(1).required('Guest count is required'),
   notes: yup.string().max(1000).optional(),
-  serviceId: yup.string().uuid('Invalid service').required('Service is required'),
-  locationId: yup.string().uuid('Invalid location').required('Location is required'),
+  serviceId: yup.string().min(1, 'Select a venue/service').required('Service is required'),
+  locationId: yup.string().min(1, 'Select a location').required('Location is required'),
 })
 
