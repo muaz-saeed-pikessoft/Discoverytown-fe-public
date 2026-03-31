@@ -19,10 +19,11 @@ let mswStartPromise: Promise<unknown> | null = null
 
 export async function initMocks(): Promise<void> {
   const isServer = typeof window === 'undefined'
-  const isDevelopment = process.env.NODE_ENV === 'development'
   const mocksEnabled = process.env.NEXT_PUBLIC_ENABLE_MOCKS === 'true'
 
-  if (isServer || !isDevelopment || !mocksEnabled) {
+  // NOTE: We intentionally allow MSW to run outside "development" as a temporary
+  // demo mechanism (e.g. preview deployments) when mocks are explicitly enabled.
+  if (isServer || !mocksEnabled) {
     return
   }
 

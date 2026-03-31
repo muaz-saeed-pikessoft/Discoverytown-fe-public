@@ -38,7 +38,9 @@ export default function MswProvider({ children }: MswProviderProps) {
   const [mswReady, setMswReady] = useState(false)
 
   useEffect(() => {
-    if (!ENV.ENABLE_MOCKS || !ENV.IS_DEVELOPMENT) {
+    // Temporary demo mechanism: allow MSW to run in preview/prod when
+    // NEXT_PUBLIC_ENABLE_MOCKS is explicitly enabled.
+    if (!ENV.ENABLE_MOCKS) {
       setMswReady(true)
       return
     }
