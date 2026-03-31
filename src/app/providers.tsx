@@ -33,6 +33,22 @@ function MswQueryInvalidator({ children }: { children: React.ReactNode }) {
   return <>{children}</>
 }
 
+function MswGate({ children }: { children: React.ReactNode }) {
+  const mswReady = useMswReady()
+
+  // When mocks are enabled, block rendering of the query tree until the service
+  // worker is active. This prevents initial requests from bypassing MSW.
+  if (ENV.ENABLE_MOCKS && !mswReady) {
+    return (
+      <div className='flex min-h-[60vh] items-center justify-center bg-[var(--dt-bg-page)] dt-font-body'>
+        <div className='h-9 w-9 animate-spin rounded-full border-4 border-[var(--dt-primary)] border-t-transparent' />
+      </div>
+    )
+  }
+
+  return <>{children}</>
+}
+
 /**
  * Automatically logs in a development user if BYPASS_USER_AUTH is true.
  * Ensures the 'access_token' cookie and Redux state are present for a 
@@ -76,32 +92,34 @@ export default function Providers({ children }: { children: React.ReactNode }) {
 
   return (
     <MswProvider>
-      <ThemeProvider>
-        <SessionProvider>
-          <Provider store={reduxStore}>
-            <QueryClientProvider client={queryClient}>
-              <MswQueryInvalidator>
-                <NuqsAdapter>
-                  <ToastContainer
-                    position='top-right'
-                    autoClose={5000}
-                    hideProgressBar={false}
-                    newestOnTop={false}
-                    closeOnClick
-                    rtl={false}
-                    pauseOnFocusLoss
-                    draggable
-                    pauseOnHover
-                    theme='light'
-                  />
-                  {ENV.BYPASS_USER_AUTH && <DevAuthManager />}
-                  {children}
-                </NuqsAdapter>
-              </MswQueryInvalidator>
-            </QueryClientProvider>
-          </Provider>
-        </SessionProvider>
-      </ThemeProvider>
+      <MswGate>
+        <ThemeProvider>
+          <SessionProvider>
+            <Provider store={reduxStore}>
+              <QueryClientProvider client={queryClient}>
+                <MswQueryInvalidator>
+                  <NuqsAdapter>
+                    <ToastContainer
+                      position='top-right'
+                      autoClose={5000}
+                      hideProgressBar={false}
+                      newestOnTop={false}
+                      closeOnClick
+                      rtl={false}
+                      pauseOnFocusLoss
+                      draggable
+                      pauseOnHover
+                      theme='light'
+                    />
+                    {ENV.BYPASS_USER_AUTH && <DevAuthManager />}
+                    {children}
+                  </NuqsAdapter>
+                </MswQueryInvalidator>
+              </QueryClientProvider>
+            </Provider>
+          </SessionProvider>
+        </ThemeProvider>
+      </MswGate>
     </MswProvider>
   )
 }
