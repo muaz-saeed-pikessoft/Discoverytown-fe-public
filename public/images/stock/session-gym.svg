@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1200" viewBox="0 0 1600 1200">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eef4ff"/>
+      <stop offset="1" stop-color="#e8efff"/>
+    </linearGradient>
+    <radialGradient id="spot" cx="30%" cy="24%" r="70%">
+      <stop offset="0" stop-color="#2f6fed" stop-opacity="0.30"/>
+      <stop offset="1" stop-color="#2f6fed" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1600" height="1200" fill="url(#bg)"/>
+  <circle cx="470" cy="320" r="760" fill="url(#spot)"/>
+  <circle cx="1260" cy="420" r="520" fill="#169b8f" opacity="0.10"/>
+  <path d="M0,860 C240,760 400,980 620,920 C840,860 1020,700 1320,780 C1480,822 1540,850 1600,880 L1600,1200 L0,1200 Z" fill="#14233b" opacity="0.12"/>
+  <!-- Dumbbell silhouette -->
+  <g transform="translate(430 510)" opacity="0.55" fill="#14233b">
+    <rect x="0" y="120" width="140" height="220" rx="40"/>
+    <rect x="1040" y="120" width="140" height="220" rx="40"/>
+    <rect x="160" y="200" width="880" height="60" rx="30"/>
+    <rect x="210" y="160" width="60" height="140" rx="30"/>
+    <rect x="930" y="160" width="60" height="140" rx="30"/>
+  </g>
+</svg>

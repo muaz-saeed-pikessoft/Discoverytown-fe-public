@@ -59,6 +59,28 @@ export const publicServices: PublicService[] = [
       pricingModel: 'per_person',
     },
   },
+  {
+    id: 'svc-public-private-hire',
+    locationId: 'loc-public-1',
+    categoryId: publicCategories[0].id,
+    category: publicCategories[0],
+    serviceType: ServiceType.PRIVATE_HIRE,
+    bookingMode: BookingMode.SCHEDULED,
+    name: 'Whole venue private hire',
+    description: 'Exclusive hire for parties, corporate events, and celebrations.',
+    durationMinutes: 240,
+    basePrice: '500.00',
+    subscriptionPrice: null,
+    ageMin: null,
+    ageMax: null,
+    metadata: {
+      imageUrl: 'https://unsplash.com/photos/close-up-photography-of-house-ashxH5TQ8Go',
+      facilities: ['Party room', 'Sound system', 'Kitchen access', 'Dedicated host'],
+      capacity: 80,
+      depositPercent: 25,
+      pricingModel: 'deposit_plus_balance',
+    },
+  },
 ]
 
 const start = new Date()

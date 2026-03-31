@@ -1,10 +1,10 @@
 'use client'
-import type { PrivatePlayCardsProps } from './types'
 
-import Link from 'next/link'
 import { useState } from 'react'
-import type { PrivatePlayOption } from './types'
+
 import ActionLink from '@/components/shared/ActionLink'
+import { ROUTES } from '@/constants/routes'
+import type { PrivatePlayCardsProps, PrivatePlayOption } from './types'
 
 function PrivateCard({ opt }: { opt: PrivatePlayOption }) {
   const [hover, setHover] = useState(false)
@@ -38,11 +38,11 @@ function PrivateCard({ opt }: { opt: PrivatePlayOption }) {
       <div className='px-5 py-5'>
         <h3 className='dt-font-heading text-[17px] font-black text-[var(--dt-dark)] leading-[1.3] mb-4'>{opt.name}</h3>
         <ActionLink
-          href={`/book?service=private-play&option=${opt.slug}`}
+          href={ROUTES.USER.PRIVATE_HIRE}
           accentColor='var(--dt-blue-mid)'
           className='w-full py-3 text-[13px]'
         >
-          Inquire Now →
+          Private Hire Details →
         </ActionLink>
       </div>
     </div>

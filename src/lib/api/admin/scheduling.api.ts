@@ -36,9 +36,19 @@ export async function getServiceSlot(id: string): Promise<ServiceSlot> {
   return response.data
 }
 
-export async function getCalendarSlots(locationId: string | null, from: string, to: string): Promise<ServiceSlot[]> {
+export async function getCalendarSlots(
+  locationId: string | null,
+  from: string,
+  to: string,
+  staffId?: string | null
+): Promise<ServiceSlot[]> {
   const response = await apiClient.get<ServiceSlot[]>('/api/v1/admin/scheduling/calendar', {
-    params: { locationId: locationId ?? undefined, from, to },
+    params: {
+      locationId: locationId ?? undefined,
+      from,
+      to,
+      staffId: staffId ?? undefined,
+    },
   })
   return response.data
 }

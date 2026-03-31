@@ -38,7 +38,9 @@ export const DEFAULT_ALL_PERMISSIONS: PermissionMap = ADMIN_MODULES.reduce<Permi
 }, {})
 
 export const DEFAULT_DEV_VIEW_PERMISSIONS: PermissionMap = ADMIN_MODULES.reduce<PermissionMap>((acc, def) => {
-  acc[def.module] = def.module === 'clients' || def.module === 'scheduling' ? ['view'] : []
+  // Used only when NEXT_PUBLIC_BYPASS_ADMIN_AUTH is enabled (local/dev convenience).
+  // Grant full permissions for all modules so every admin feature is reachable in dev.
+  acc[def.module] = [...def.actions]
   return acc
 }, {})
 

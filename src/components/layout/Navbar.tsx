@@ -9,7 +9,6 @@ import { ROUTES } from '@/constants/routes'
 import type { RootState } from '@/store/store'
 
 const links = [
-  { label: 'Activities', href: ROUTES.USER.ACTIVITIES },
   { label: 'Play', href: ROUTES.USER.PLAY },
   { label: 'Cafe & Food', href: ROUTES.USER.CAFE },
   { label: 'Events', href: ROUTES.USER.EVENTS },

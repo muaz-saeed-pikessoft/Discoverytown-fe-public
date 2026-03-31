@@ -38,6 +38,8 @@ const NAV_GROUPS: NavGroup[] = [
     items: [
       { label: 'Sessions', href: '/admin/scheduling', icon: '🎫' },
       { label: 'Calendar', href: '/admin/scheduling/calendar', icon: '🗓️' },
+      { label: 'Availability', href: '/admin/scheduling/availability', icon: '🟩' },
+      { label: 'Private hire', href: '/admin/scheduling/private-hire', icon: '🔒' },
       { label: 'Services', href: '/admin/scheduling/services', icon: '🧩' },
       { label: 'Add-ons', href: '/admin/scheduling/add-ons', icon: '➕' },
       { label: 'Locations', href: '/admin/scheduling/locations', icon: '📍' },

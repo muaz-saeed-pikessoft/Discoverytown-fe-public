@@ -9,6 +9,11 @@ import { useMemo } from 'react'
 
 import StatCard from '@/components/ui/StatCard'
 import { MOCK_BOOKINGS } from '@/data/mockData'
+import { useCalendarSlots } from '@/portal/admin/features/scheduling/hooks/useCalendarSlots'
+import { usePrivateHireRequests } from '@/portal/admin/features/calendar/hooks/usePrivateHireRequests'
+import { useContacts } from '@/portal/admin/features/clients/hooks/useContacts'
+import { addDays, startOfDay } from '@/portal/admin/features/scheduling/utils/calendar-date-utils'
+import { BookingStatus } from '@/types/scheduling.shared'
 
 /** Dashboard stat configuration — config-driven rendering */
 const DASHBOARD_STATS = [
@@ -43,18 +48,33 @@ const DASHBOARD_STATS = [
 ] as const
 
 export default function AdminDashboardPage() {
+  const today = useMemo(() => startOfDay(new Date()), [])
+  const todayRange = useMemo(() => ({ from: today.toISOString(), to: addDays(today, 1).toISOString() }), [today])
+
+  const sessionsToday = useCalendarSlots(null, todayRange, null)
+  const pendingPrivateHire = usePrivateHireRequests({ status: BookingStatus.PENDING, limit: 50 })
+
+  const weekStart = useMemo(() => {
+    const d = startOfDay(new Date())
+    return addDays(d, -6)
+  }, [])
+  const newContacts = useContacts({
+    createdFrom: weekStart.toISOString(),
+    createdTo: addDays(startOfDay(new Date()), 1).toISOString(),
+  })
+
   /** Calculate stats from data */
   const statValues = useMemo(() => {
     const confirmedCount = MOCK_BOOKINGS.filter(b => b.status === 'confirmed').length
     const totalRevenue = MOCK_BOOKINGS.reduce((sum, b) => sum + b.amount, 0)
 
     return {
-      'total-bookings': MOCK_BOOKINGS.length.toString(),
+      'total-bookings': sessionsToday.data ? String(sessionsToday.data.length) : '—',
       'active-users': '248',
       revenue: `$${totalRevenue.toLocaleString()}`,
-      pending: confirmedCount.toString(),
+      pending: pendingPrivateHire.data ? String(pendingPrivateHire.data.data.length) : confirmedCount.toString(),
     }
-  }, [])
+  }, [pendingPrivateHire.data, sessionsToday.data])
 
   return (
     <div>
@@ -75,6 +95,28 @@ export default function AdminDashboardPage() {
             bgColor={stat.bgColor}
           />
         ))}
+      </div>
+
+      <div className='mt-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3'>
+        <div className='rounded-xl border border-gray-200 bg-white p-5'>
+          <div className='text-xs font-black uppercase tracking-widest text-gray-500'>Today’s sessions</div>
+          <div className='mt-2 text-2xl font-black text-gray-900'>{sessionsToday.data ? sessionsToday.data.length : '—'}</div>
+          <div className='mt-1 text-sm font-semibold text-gray-600'>Across all locations</div>
+        </div>
+        <div className='rounded-xl border border-gray-200 bg-white p-5'>
+          <div className='text-xs font-black uppercase tracking-widest text-gray-500'>Pending private hire</div>
+          <div className='mt-2 text-2xl font-black text-gray-900'>
+            {pendingPrivateHire.data ? pendingPrivateHire.data.data.length : '—'}
+          </div>
+          <div className='mt-1 text-sm font-semibold text-gray-600'>Awaiting review</div>
+        </div>
+        <div className='rounded-xl border border-gray-200 bg-white p-5'>
+          <div className='text-xs font-black uppercase tracking-widest text-gray-500'>New contacts (7 days)</div>
+          <div className='mt-2 text-2xl font-black text-gray-900'>
+            {newContacts.data ? newContacts.data.data.length : '—'}
+          </div>
+          <div className='mt-1 text-sm font-semibold text-gray-600'>Created recently</div>
+        </div>
       </div>
 
       {/* Recent Bookings */}

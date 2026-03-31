@@ -1,4 +1,7 @@
 import Link from 'next/link'
+
+import { ROUTES } from '@/constants/routes'
+
 import { highlights } from './constants'
 
 export default function HeroSection() {
@@ -19,9 +22,7 @@ export default function HeroSection() {
               <br />
               and&nbsp;<em className='not-italic text-[#f5a855]'>celebrate.</em>
               <br />
-              <span className="text-[clamp(1.8rem,3.5vw,3rem)]">
-                here,&nbsp;or&nbsp;at&nbsp;your&nbsp;place
-              </span>
+              <span className='text-[clamp(1.8rem,3.5vw,3rem)]'>here,&nbsp;or&nbsp;at&nbsp;your&nbsp;place</span>
             </h1>
 
             <p className='mt-5 text-[15px] leading-[1.85] text-white/70 max-w-[400px] sm:text-[16px]'>
@@ -30,14 +31,20 @@ export default function HeroSection() {
             </p>
 
             <div className='mt-8 flex flex-wrap gap-3'>
-              <Link href='/book' className='dt-btn-primary'>
+              <Link href={ROUTES.USER.BOOK} className='dt-btn-primary'>
                 Book a Visit
               </Link>
               <Link
-                href='/events'
+                href={ROUTES.USER.EVENTS}
                 className='rounded-full border border-white/22 bg-white/8 px-6 py-2.5 text-[14px] font-bold text-white backdrop-blur-sm transition hover:bg-white/16'
               >
                 Plan a Party →
+              </Link>
+              <Link
+                href={ROUTES.USER.PRIVATE_HIRE}
+                className='rounded-full border border-white/22 bg-white/8 px-6 py-2.5 text-[14px] font-bold text-white backdrop-blur-sm transition hover:bg-white/16'
+              >
+                Private Hire & Venue Rental →
               </Link>
             </div>
 

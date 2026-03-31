@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'react-toastify'
+import Link from 'next/link'
 
 import PageHeader from '@/components/shared/PageHeader'
 import EmptyState from '@/components/shared/EmptyState'
@@ -20,7 +21,12 @@ import SignatureCanvas from '@/portal/admin/features/clients/components/Signatur
 import { useDocuments, useSendSigningRequest, useSignDocument } from '@/portal/admin/features/clients/hooks/useDocuments'
 import DocumentStatusRow from '@/portal/admin/features/clients/components/DocumentStatusRow'
 import { addRelationship } from '@/lib/api/admin/clients.api'
+import DataTable from '@/components/shared/DataTable'
+import type { TableColumn } from '@/types/common'
+import BookingStatusBadge from '@/portal/admin/features/scheduling/components/BookingStatusBadge'
+import { ROUTES } from '@/constants/routes'
 import type { Document } from '@/types/clients.shared'
+import type { Booking } from '@/types/scheduling.shared'
 
 interface AdminClientDetailPageClientProps {
   id: string
@@ -175,8 +181,71 @@ export default function AdminClientDetailPageClient({ id }: AdminClientDetailPag
           ) : null}
 
           {activeTab === 'bookings' ? (
-            <div className='rounded-2xl border border-gray-200 bg-white p-4 text-sm font-semibold text-gray-600'>
-              Total bookings loaded: {bookings?.data.length ?? 0}
+            <div className='rounded-2xl border border-gray-200 bg-white p-4'>
+              <div className='mb-3 text-sm font-black text-gray-900'>Booking history</div>
+              <DataTable
+                data={(bookings?.data ?? []) as Booking[]}
+                columns={
+                  [
+                    {
+                      key: 'id',
+                      label: 'Booking',
+                      sortable: true,
+                      render: (v, row) => (
+                        <div className='min-w-0'>
+                          <div className='font-mono text-xs font-black text-gray-800'>{String(v).slice(0, 8)}…</div>
+                          <div className='text-xs font-semibold text-gray-500'>{row.bookingType}</div>
+                        </div>
+                      ),
+                    },
+                    {
+                      key: 'service',
+                      label: 'Service',
+                      render: (_v, row) => (
+                        <div className='min-w-0'>
+                          <div className='truncate text-sm font-black text-gray-900'>{row.service.name}</div>
+                          <div className='text-xs font-semibold text-gray-500'>{row.service.serviceType.replaceAll('_', ' ')}</div>
+                        </div>
+                      ),
+                    },
+                    {
+                      key: 'startAt',
+                      label: 'When',
+                      sortable: true,
+                      render: (_v, row) =>
+                        row.startAt ? (
+                          <span className='text-sm font-semibold text-gray-700'>{new Date(row.startAt).toLocaleString()}</span>
+                        ) : (
+                          <span className='text-sm text-gray-400'>—</span>
+                        ),
+                    },
+                    {
+                      key: 'status',
+                      label: 'Status',
+                      sortable: true,
+                      render: (_v, row) => <BookingStatusBadge status={row.status} />,
+                    },
+                    {
+                      key: 'serviceSlotId',
+                      label: 'Session',
+                      align: 'right',
+                      render: (_v, row) =>
+                        row.serviceSlotId ? (
+                          <Link
+                            href={ROUTES.ADMIN.SCHEDULING_EVENT(row.serviceSlotId)}
+                            className='text-xs font-black text-blue-700 hover:underline'
+                          >
+                            View session
+                          </Link>
+                        ) : (
+                          <span className='text-xs text-gray-400'>—</span>
+                        ),
+                    },
+                  ] as TableColumn<Booking>[]
+                }
+                keyExtractor={b => b.id}
+                pageSize={10}
+              />
             </div>
           ) : null}
 

@@ -194,6 +194,28 @@ export interface AvailableWindowsResponse {
   operatingHours: { open: string; close: string } | null
 }
 
+export interface AvailabilityCellSlot {
+  slotId: string
+  serviceName: string
+  instructorName: string | null
+  bookedCount: number
+  capacity: number
+  status: SlotStatus
+}
+
+export interface AvailabilityCell {
+  date: string
+  hour: number
+  sessionCount: number
+  averageCapacityPercent: number
+  slots: AvailabilityCellSlot[]
+}
+
+export interface ConflictResult {
+  hasConflicts: boolean
+  conflicts: ServiceSlot[]
+}
+
 export interface PublicServiceSlot {
   id: string
   serviceId: string

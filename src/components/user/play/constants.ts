@@ -14,6 +14,7 @@ export const PURPLE = 'purple'
 export const SOFT_BG = '#f8f7f4'
 
 export const NAV: NavItem[] = [
+  { id: 'browse-sessions', label: 'Browse Sessions' },
   { id: 'open-play', label: 'Open Play' },
   { id: 'private-play', label: 'Private Play' },
   { id: 'special-events', label: 'Special Events' },
@@ -76,21 +77,78 @@ export const PRIVATE: PrivatePlayOption[] = [
     name: 'Private Party Room + Open Play',
     desc: 'Book a private room while enjoying open play for your whole group.',
     accent: 'primary',
-    img: 'https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=700&q=80',
+    img:
+      `data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eef4ff"/>
+      <stop offset="1" stop-color="#fff6ee"/>
+    </linearGradient>
+    <radialGradient id="spot" cx="28%" cy="22%" r="80%">
+      <stop offset="0" stop-color="#2f6fed" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#2f6fed" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  <circle cx="360" cy="220" r="560" fill="url(#spot)"/>
+  <circle cx="930" cy="230" r="300" fill="#ff6b6b" opacity="0.14"/>
+  <circle cx="920" cy="590" r="380" fill="#169b8f" opacity="0.10"/>
+  <path d="M0,610 C260,550 390,720 590,675 C790,630 950,480 1200,560 L1200,800 L0,800 Z" fill="#14233b" opacity="0.12"/>
+  <text x="64" y="670" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="48" font-weight="800" fill="#14233b">Private party room</text>
+  <text x="64" y="726" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="26" font-weight="700" fill="#3d4b66" opacity="0.92">Room + open play for your group</text>
+</svg>`)}`,
   },
   {
     slug: 'whole-venue-buyout',
     name: 'Whole Venue Buyout',
     desc: 'Reserve the entire venue for a fully private, exclusive experience.',
     accent: 'primary',
-    img: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=700&q=80',
+    img:
+      `data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eef4ff"/>
+      <stop offset="1" stop-color="#fff6ee"/>
+    </linearGradient>
+    <radialGradient id="spot" cx="32%" cy="20%" r="80%">
+      <stop offset="0" stop-color="#169b8f" stop-opacity="0.24"/>
+      <stop offset="1" stop-color="#169b8f" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  <circle cx="390" cy="220" r="560" fill="url(#spot)"/>
+  <circle cx="950" cy="240" r="320" fill="#2f6fed" opacity="0.12"/>
+  <circle cx="900" cy="610" r="420" fill="#ffb020" opacity="0.10"/>
+  <path d="M0,610 C260,540 390,740 600,685 C810,630 950,480 1200,560 L1200,800 L0,800 Z" fill="#14233b" opacity="0.12"/>
+  <text x="64" y="670" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="48" font-weight="800" fill="#14233b">Whole venue buyout</text>
+  <text x="64" y="726" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="26" font-weight="700" fill="#3d4b66" opacity="0.92">Exclusive private experience</text>
+</svg>`)}`,
   },
   {
     slug: 'meeting-room-rental',
     name: 'Meeting Room Rental',
     desc: 'Reserve rooms for conferences, workshops, or corporate events.',
     accent: 'primary',
-    img: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=700&q=80',
+    img:
+      `data:image/svg+xml;utf8,${encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="800" viewBox="0 0 1200 800">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eef4ff"/>
+      <stop offset="1" stop-color="#fff6ee"/>
+    </linearGradient>
+    <radialGradient id="spot" cx="30%" cy="22%" r="80%">
+      <stop offset="0" stop-color="#2f6fed" stop-opacity="0.22"/>
+      <stop offset="1" stop-color="#2f6fed" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="1200" height="800" fill="url(#bg)"/>
+  <circle cx="370" cy="230" r="560" fill="url(#spot)"/>
+  <circle cx="950" cy="250" r="320" fill="#3b94cb" opacity="0.12"/>
+  <circle cx="910" cy="600" r="420" fill="#169b8f" opacity="0.10"/>
+  <path d="M0,610 C260,540 390,740 600,685 C810,630 950,480 1200,560 L1200,800 L0,800 Z" fill="#14233b" opacity="0.12"/>
+  <text x="64" y="670" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="48" font-weight="800" fill="#14233b">Meeting room rental</text>
+  <text x="64" y="726" font-family="ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Arial" font-size="26" font-weight="700" fill="#3d4b66" opacity="0.92">Workshops · corporate events</text>
+</svg>`)}`,
   },
 ]
 

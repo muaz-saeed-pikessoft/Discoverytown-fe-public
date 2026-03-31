@@ -7,6 +7,18 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'images.unsplash.com',
       },
+      {
+        protocol: 'https',
+        hostname: 'unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'source.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'picsum.photos',
+      },
       { protocol: 'https', hostname: '*.amazonaws.com' },
       { protocol: 'https', hostname: '*.azure.com' },
     ],
@@ -23,9 +35,9 @@ const nextConfig = {
       default-src 'self';
       script-src 'self' 'unsafe-eval' 'unsafe-inline';
       style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-      img-src 'self' blob: data: https://images.unsplash.com;
+      img-src 'self' blob: data: https://images.unsplash.com https://unsplash.com https://source.unsplash.com https://picsum.photos;
       font-src 'self' https://fonts.gstatic.com;
-      connect-src 'self' ${apiUrl} https://images.unsplash.com https://fonts.gstatic.com https://fonts.googleapis.com;
+      connect-src 'self' ${apiUrl} https://images.unsplash.com https://unsplash.com https://source.unsplash.com https://picsum.photos https://fonts.gstatic.com https://fonts.googleapis.com;
       object-src 'none';
       base-uri 'self';
       form-action 'self';

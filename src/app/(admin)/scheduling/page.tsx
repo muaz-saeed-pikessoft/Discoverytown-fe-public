@@ -165,7 +165,7 @@ export default function AdminSchedulingPage() {
               href={ROUTES.ADMIN.SCHEDULING_NEW}
               className='h-10 rounded-xl bg-blue-600 px-4 text-xs font-black leading-10 text-white transition hover:bg-blue-700'
             >
-              New event
+              New session
             </Link>
           }
           actions={

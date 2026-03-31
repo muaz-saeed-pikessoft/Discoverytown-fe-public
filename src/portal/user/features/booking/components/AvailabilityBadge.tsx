@@ -1,6 +1,7 @@
 'use client'
 
 import type { SlotStatus } from '@/types/scheduling.shared'
+import StatusChip from '@/components/shared/StatusChip'
 
 interface AvailabilityBadgeProps {
   availableSpots: number
@@ -12,25 +13,15 @@ export default function AvailabilityBadge({ availableSpots, status, capacity }: 
   const remainingPct = capacity > 0 ? availableSpots / capacity : 0
 
   if (status === 'FULL' || availableSpots <= 0) {
-    return (
-      <span className='inline-flex items-center rounded-full bg-red-50 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-red-700'>
-        Fully booked
-      </span>
-    )
+    return <StatusChip variant='error'>Fully booked</StatusChip>
   }
 
   if (remainingPct <= 0.2) {
-    return (
-      <span className='inline-flex items-center rounded-full bg-amber-50 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-amber-800'>
-        Only {availableSpots} left
-      </span>
-    )
+    return <StatusChip variant='warning'>Only {availableSpots} left</StatusChip>
   }
 
   return (
-    <span className='inline-flex items-center rounded-full bg-emerald-50 px-2 py-1 text-[10px] font-black uppercase tracking-widest text-emerald-800'>
-      {availableSpots} spots
-    </span>
+    <StatusChip variant='success'>{availableSpots} spots</StatusChip>
   )
 }
 
